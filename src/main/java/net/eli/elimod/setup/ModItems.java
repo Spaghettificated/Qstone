@@ -3,13 +3,17 @@ package net.eli.elimod.setup;
 import java.util.function.Function;
 
 import net.eli.elimod.Elimod;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class ModItems {
@@ -26,8 +30,11 @@ public class ModItems {
 
     public static void registerModItems() {
         Elimod.LOGGER.info("registering items");
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(itemGroup -> {
+        ItemGroupEvents.modifyEntriesEvent(ModItemGroups.MISC_ITEM_GROUP_KEY).register(itemGroup -> {
             itemGroup.add(Y_SWORD);
         });
     }
+    
+
+    
 }

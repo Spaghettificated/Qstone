@@ -73,7 +73,19 @@ public class ModBlocks {
     public static void registerModBlocks() {
         Elimod.LOGGER.info("registering items");
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(itemGroup -> {
+            // itemGroup.add(TEST_BLOCK.asItem());
+            // itemGroup.add(QBIT_BLOCK.asItem());
+            // itemGroup.add(QBIT_WIRE.asItem());
+			// for (Block block : QBIT_GATE_BLOCKS) {
+			// 	itemGroup.add(block.asItem());
+			// }
+            // itemGroup.add(QBIT_GATE.asItem());
+        });
+		ItemGroupEvents.modifyEntriesEvent(ModItemGroups.MISC_ITEM_GROUP_KEY).register(itemGroup -> {
             itemGroup.add(TEST_BLOCK.asItem());
+            // itemGroup.add(QBIT_GATE.asItem());
+        });
+		ItemGroupEvents.modifyEntriesEvent(ModItemGroups.QUANTUM_ITEM_GROUP_KEY).register(itemGroup -> {
             itemGroup.add(QBIT_BLOCK.asItem());
             itemGroup.add(QBIT_WIRE.asItem());
 			for (Block block : QBIT_GATE_BLOCKS) {

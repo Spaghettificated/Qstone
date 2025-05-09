@@ -2,6 +2,7 @@ package net.eli.elimod;
 
 import net.eli.elimod.quantum.Qbit;
 import net.eli.elimod.setup.ModBlocks;
+import net.eli.elimod.setup.ModItemGroups;
 import net.eli.elimod.setup.ModItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -16,7 +17,8 @@ public class Elimod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("Elimod says hello");
+		ModItemGroups.RegisterItemGroups();
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
 	}

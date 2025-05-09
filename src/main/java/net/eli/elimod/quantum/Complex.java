@@ -142,7 +142,9 @@ public class Complex implements Cloneable{
     // public static Complex div(Complex z, Complex w){
     //     return z.clone().div(w);
     // }
-
+    public static Complex fromPolar(double A,double theta){
+        return new Complex(Math.cos(theta), Math.sin(theta)).mul(A);
+    }
     public static Complex fromPhase(double theta){
         return new Complex(Math.cos(theta), Math.sin(theta));
     }
@@ -167,9 +169,9 @@ public class Complex implements Cloneable{
     // }
 
     @Override public String toString() {
-        if(re==0. && im==0.) { return "0.00"; }
-        if(re==0.) { return String.format("%.2fi", im); }
-        if(im==0.) { return String.format("%.2f", re); }
+        if(Math.abs(re)<0.005 && Math.abs(im)<0.005) { return "0.00"; }
+        if(Math.abs(re)<0.005) { return String.format("%.2fi", im); }
+        if(Math.abs(im)<0.005) { return String.format("%.2f", re); }
         return (im>0) ? String.format("%.2f + %.2fi", re, im) : String.format("%.2f - %.2fi", re, im);
     }
     

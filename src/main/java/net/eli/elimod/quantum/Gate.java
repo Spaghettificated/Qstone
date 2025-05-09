@@ -77,6 +77,20 @@ public class Gate {
         }}
         return new Qbit(out);
     }
+    public State actOn(State x){
+        // if(size() != x.size()){
+        //     throw new Exception("matrix and vector dimensions do not match");
+        // }
+        var v = x.getVec();
+        Complex[] out = new Complex[v.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = new Complex(0,0);
+        }
+        for (int i = 0; i < out.length; i++) { for (int j = 0; j < out.length; j++) {
+                out[i] = out[i].add(Complex.mul(mat[i][j], v[j]));
+        }}
+        return new State(out);
+    }
 
     // public State actOn(State x){
     //     // if(size() != x.size()){
