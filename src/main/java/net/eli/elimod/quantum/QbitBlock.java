@@ -42,15 +42,7 @@ public abstract class QbitBlock extends BlockWithEntity {
 					if(neighbour_facing != null && neighbour_facing == dir.getOpposite()){
 						world.updateNeighbor(pos.offset(dir), this, null);
 					}
-
 				}
-				// neighbour.
-				// if (neighbour.hasProperty(Properties.FACING)){
-				// 	var neighbour_facing = neighbour.get(Properties.FACING);
-				// 	if(neighbour_facing != null && neighbour_facing == dir.getOpposite()){
-				// 		world.updateNeighbor(pos.offset(dir), this, null);
-				// 	}
-				// }
 			}
 			// world.updateNeighbors(pos, sourceBlock);
 			for (var player : world.getPlayers()) {

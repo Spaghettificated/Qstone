@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public class Qbit extends State{
     // public Complex[] getVec() { return vec; }
@@ -67,5 +68,11 @@ public class Qbit extends State{
         var u = getVec();
         var v = other.getVec();
         return u[0].eq(v[0]) && u[1].eq(v[1]);
+    }
+
+    public Vec3d blochVec(){
+        return new Vec3d(State.dot(this, Gate.X.actOn(this)).re, 
+                         State.dot(this, Gate.Z.actOn(this)).re,
+                         State.dot(this, Gate.Y.actOn(this)).re);
     }
 }
