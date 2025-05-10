@@ -1,5 +1,7 @@
 package net.eli.elimod.quantum;
 
+import java.util.Arrays;
+
 public class Complex implements Cloneable{
     public double re;
     public double im;
@@ -62,6 +64,33 @@ public class Complex implements Cloneable{
         // return new Complex(real, imag);
         return this.mul(z.con()).div(z.magSqr());
     }
+    public Complex powi(int n) {
+        if (n < 0) return Complex.ONE.div(this.powi(-n));
+        Complex result = Complex.ONE;
+        Complex base = this;
+        while (n > 0) {
+            if ((n & 1) == 1) result = result.mul(base);
+            base = base.mul(base);
+            n >>= 1;
+        }
+        return result;
+    }
+    public Complex sqrt() {
+        double r = Math.hypot(re, im); // magnitude
+        double theta = Math.atan2(im, re); // angle
+        double sqrtR = Math.sqrt(r);
+        double halfTheta = theta / 2;
+        return new Complex(sqrtR * Math.cos(halfTheta), sqrtR * Math.sin(halfTheta));
+    }
+    public static Complex sum(Complex... numbers) {
+        Complex total = Complex.ZERO;
+        for (Complex z : numbers) {
+            total = total.add(z);
+        }
+        return total;
+    }
+    
+
     public Complex addmut(Complex z) { set(this.add(z)); return this; }
     public Complex submut(Complex z) { set(this.sub(z)); return this; }
     public Complex mulmut(Complex z) { set(this.mul(z)); return this; }
@@ -167,6 +196,8 @@ public class Complex implements Cloneable{
     // public static Complex div(Complex a, Complex b){
     //     return new Complex(a.re / b.re, a.im / b.im);
     // }
+
+
 
     @Override public String toString() {
         if(Math.abs(re)<0.005 && Math.abs(im)<0.005) { return "0.00"; }

@@ -67,6 +67,11 @@ public class State {
     public double norm(){
         return Math.sqrt(normSqr());
     }
+    public State normalize(){
+        this.mulmut(1 / this.norm());
+        return this;
+    }
+
     public static State productState(Qbit... qbits){
         int n = qbits.length;
         Complex[] vec = new Complex[Utils.powi(2, n)];
@@ -112,8 +117,55 @@ public class State {
         }
         return Optional.empty();
     }
+    public State[] schmidtDecomposition(){ // elements-of-quantum-computation-and-quantum-communication [Anirban Aathak] page 96 
+        if(size()==2){
+            State[] out = {this};
+            return out;
+        }
+        if(size() == 4){
+            var out = new State[2];
+            Complex a = vec[0].powi(2).add(vec[1].powi(2));
+            Complex b = vec[0].con().mul(vec[2]). add( vec[1].con().mul(vec[3]));
+            Complex delta = Complex.sum(Complex.ONE, Complex.fromRe(4 * b.mag()), a.powi(2).mul(4), a.mul(-4)).sqrt();
+            // Complex coeff0 = a.sqrt();
+            // Complex coeff1 = Complex.ONE.sub(a).sqrt();
+            Complex eigv0, eigv1;
+            Qbit v0,v1;
+            if(b.eq(Complex.ZERO)){
+                eigv0 = a;
+                eigv1 = Complex.ONE.sub(a);
+                v0 = new Qbit(Complex.ZERO, Complex.ONE);
+                v1 = new Qbit(Complex.ONE,  Complex.ZERO);
+            }
+            else{
+                eigv0 = Complex.ONE.add(delta).div(2);
+                eigv1 = Complex.ONE.sub(delta).div(2);
+                v0 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta      ).div( b.con().mul(2) ), Complex.ONE);
+                v1 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta.neg()).div( b.con().mul(2) ), Complex.ONE);
+            }
+            v0.normalize();
+            v1.normalize();
+            var coeff0 = eigv0.sqrt();
+            var coeff1 = eigv1.sqrt();
+            // matrix for eqation M*(x0 x1) = (S0 S2) and M*(y0 y1) = (S1 S3) where S is initial 4-state and x,y form second qbit base
+            var ma = coeff0.mul(v0.get(0));
+            var mb = coeff1.mul(v1.get(0));
+            var mc = coeff0.mul(v0.get(1));
+            var md = coeff1.mul(v1.get(1));
+            var amp = Complex.ONE.div( Complex.sub( ma.mul(md), mb.mul(mc)) );
+            Complex[][] inverse = {{md.div(amp),       mb.neg().div(amp)},
+                                   {mc.neg().div(amp), ma.div(amp)      }};
+            var solveGate = new Gate(inverse);
+            var xvec = solveGate.actOn(new Qbit(vec[0], vec[2]));
+            var yvec = solveGate.actOn(new Qbit(vec[1], vec[3]));
+            var u0 = new Qbit(xvec.get(0), yvec.get(0));
+            var u1 = new Qbit(xvec.get(1), yvec.get(1));
+            return out;
+        }
+        return new State[0];
+    }
     
-    public Optional<Qbit> asQbit(){
+    public Optional<Qbit> asQbit(){ 
         if(size()==2){
             return Optional.of(new Qbit(vec));
         }
