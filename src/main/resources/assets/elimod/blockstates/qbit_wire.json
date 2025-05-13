@@ -1,7 +1,27 @@
 {
   "variants": {
-    "": {
-      "model": "elimod:block/qbit_block"
+    "facing=north": {
+      "model": "elimod:block/qbit_wire"
+    },
+    "facing=east": {
+      "model": "elimod:block/qbit_wire",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "elimod:block/qbit_wire",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "elimod:block/qbit_wire",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "elimod:block/qbit_wire",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "elimod:block/qbit_wire",
+      "x": 90
     }
   }
 }

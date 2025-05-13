@@ -95,8 +95,4 @@ public class QbitGateBlock extends QbitBlock {
 		// world.updateNeighborsExcept(pos, this, direction, null );
     }
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
-    }
 }

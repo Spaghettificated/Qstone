@@ -1,6 +1,6 @@
 {
     "model": {
         "type" : "minecraft:model",
-        "model": "elimod:block/qbit_gate_x"
+        "model": "elimod:block/qbit_wire"
       }
 }

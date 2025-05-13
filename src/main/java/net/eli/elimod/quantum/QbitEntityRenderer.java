@@ -17,13 +17,24 @@ import net.minecraft.util.math.Vec3d;
 @Environment(EnvType.CLIENT)
 public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
     // A jukebox itemstack
+    // private static final ItemStack[] markerItems = {
+    //     new ItemStack(Items.RED_TERRACOTTA),
+    //     new ItemStack(Items.GREEN_TERRACOTTA),
+    //     new ItemStack(Items.BLUE_TERRACOTTA),
+    //     new ItemStack(Items.YELLOW_TERRACOTTA),
+    //     new ItemStack(Items.PURPLE_TERRACOTTA),
+    // };
     private static final ItemStack[] markerItems = {
-        new ItemStack(Items.RED_TERRACOTTA),
-        new ItemStack(Items.GREEN_TERRACOTTA),
-        new ItemStack(Items.BLUE_TERRACOTTA),
-        new ItemStack(Items.YELLOW_TERRACOTTA),
-        new ItemStack(Items.PURPLE_TERRACOTTA),
+        new ItemStack(Items.RED_CONCRETE),
+        new ItemStack(Items.GREEN_CONCRETE),
+        new ItemStack(Items.BLUE_CONCRETE),
+        new ItemStack(Items.CYAN_CONCRETE),
+        new ItemStack(Items.MAGENTA_CONCRETE),
+        new ItemStack(Items.YELLOW_CONCRETE),
+        new ItemStack(Items.BLACK_CONCRETE),
     };
+    public static final double marker_size = 0.4;
+    public static final double marigin_size = 0.05;
  
     public QbitEntityRenderer(BlockEntityRendererFactory.Context ctx) {}
 
@@ -44,9 +55,8 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
 
             // Move the item
             Vec3d center = new Vec3d(0.5, 0.5, 0.5);
-            double size = 0.7;
-            matrices.translate(center.add(bloch.multiply(0.5 - size/4. - 0.001)));
-            matrices.scale((float)size, (float)size, (float)size);
+            matrices.translate(center.add(bloch.multiply(0.5 - marker_size/4. - marigin_size)));
+            matrices.scale((float)marker_size, (float)marker_size, (float)marker_size);
      
             // Rotate the item
             // matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((entity.getWorld().getTime() + tickDelta) * 4));

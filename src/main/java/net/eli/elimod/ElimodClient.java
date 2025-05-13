@@ -19,6 +19,9 @@ public class ElimodClient implements ClientModInitializer {
         // BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.QBIT_BLOCK, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.QBIT_BLOCK, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.QBIT_WIRE, RenderLayer.getTranslucent());
+        for (var block : ModBlocks.QBIT_GATE_BLOCKS) {
+            BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent());
+        }
         // for (var block : ModBlocks.QBIT_GATE_BLOCKS) {
         //     BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getIn());
         // }

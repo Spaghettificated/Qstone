@@ -17,8 +17,8 @@ public class State {
     public int size(){
         return vec.length;
     }
-    public long numQbits(){
-        return Math.round(Math.log(size()) / Math.log(2));
+    public int numQbits(){
+        return (int)Math.round(Math.log(size()) / Math.log(2));
     }
     public static Complex dot(State s1, State s2){
         Complex[] u = s1.getVec();
@@ -172,4 +172,11 @@ public class State {
         return Optional.empty();
     }
 
+    // public double measurementProbability(Qbit direction, int qbitPos){
+    //     int n = numQbits();
+
+    // }
+
 }
+
+

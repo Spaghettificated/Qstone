@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "elimod:block/qbit_gate_y"
+    }
+  }
+}
