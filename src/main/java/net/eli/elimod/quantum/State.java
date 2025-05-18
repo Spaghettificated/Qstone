@@ -20,6 +20,19 @@ public class State {
     public int numQbits(){
         return (int)Math.round(Math.log(size()) / Math.log(2));
     }
+    public static State[] basis(int n){
+        State[] out = new State[n];
+        for (int i = 0; i < n; i++) {
+            Complex[] state = new Complex[n];
+            for (int j = 0; j < n; j++) {
+                state[j] = (i==j) ? Complex.ONE : Complex.ZERO;
+            }
+            out[i] = new State(state);
+        }
+        return out;
+    }
+    public State[] basis() { return State.basis(size()); }
+
     public static Complex dot(State s1, State s2){
         Complex[] u = s1.getVec();
         Complex[] v = s2.getVec();
@@ -33,6 +46,34 @@ public class State {
     public static double aligment(State s1, State s2){
         return dot(s1, s2).magSqr();
     }
+    public static Gate projection(State s1, State s2){
+        int size = s1.size();
+        Complex[][] out = new Complex[size][size];
+        for (int i = 0; i < size; i++) { for (int j = 0; j < size; j++) {
+                out[i][j] = s1.get(i).mul(s2.get(j));
+        }}
+        return new Gate(out);
+    }
+    public static Gate projection(State s1) { return projection(s1, s1); }
+    private static Complex[] tensorVec(Complex[] a, Complex[] b) { //gen
+        Complex[] result = new Complex[a.length * b.length];
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < b.length; j++) {
+                result[i * b.length + j] = a[i].mul(b[j]);
+            }
+        }
+        return result;
+    }
+    public static State tensor(State... states) { //gen
+        if (states.length == 0) throw new IllegalArgumentException("At least one state required");
+    
+        Complex[] result = states[0].getVec();
+        for (int i = 1; i < states.length; i++) {
+            result = tensorVec(result, states[i].getVec());
+        }
+        return new State(result);
+    }
+    
     @Override public String toString() {
         String out = "|" + vec[0].toString();
 
@@ -117,6 +158,7 @@ public class State {
         }
         return Optional.empty();
     }
+
     public State[] schmidtDecomposition(){ // elements-of-quantum-computation-and-quantum-communication [Anirban Aathak] page 96 
         if(size()==2){
             State[] out = {this};

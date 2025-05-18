@@ -1,8 +1,12 @@
 package net.eli.elimod.quantum;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
+
+import com.google.common.collect.Streams;
+import com.llamalad7.mixinextras.lib.apache.commons.ArrayUtils;
 
 import net.eli.elimod.setup.ModBlockEntities;
 import net.minecraft.block.BlockState;
@@ -24,13 +28,19 @@ import net.minecraft.world.World;
 
 public class QbitEntity extends BlockEntity{
     public boolean isVisible;
-    private Optional<Qbit> qbit;
+    private Optional<State> qbit;
+    private int qbit_pos;
+    private BlockPos[] entangled;
     private Vec3d[] blochVecs = new Vec3d[0];
-    public Optional<Qbit> getQbit()                { return qbit; }
+
+    public int getQbit_pos() { return qbit_pos; }
+    public BlockPos[] getEntangled() { return entangled; }
+    public Optional<State> getQbit()                { return qbit; }
     public Vec3d[] getBlochVecs()                  { return blochVecs; }
-    public void setQbit(Qbit qbit)                 { this.qbit = Optional.of(qbit);  this.updateBlochVecs(); }
-    public void clearQbit()                        { this.qbit = Optional.empty();   this.updateBlochVecs(); }
-    public void setQbitOption(Optional<Qbit> qbit) { this.qbit = qbit;               this.updateBlochVecs(); }
+    public void setQbit(Qbit qbit)                 { this.qbit = Optional.of(qbit); this.updateBlochVecs(); }
+    public void clearQbit()                        { this.qbit = Optional.empty();  this.updateBlochVecs(); }
+    public void setQbitOption(Optional<State> qbit) { this.qbit = qbit;             this.updateBlochVecs(); }
+    // public void set(QbitEntity other) {this.qbit = other.qbit; this.qbit_pos = other.qbit_pos;}
 
     public void updateBlochVecs(){
         // on second thought this probably shouldn't be calculated serverside
@@ -40,18 +50,21 @@ public class QbitEntity extends BlockEntity{
         int n_qbits = qbit.isPresent() ? 1 : 0;
         Vec3d[] out = new Vec3d[n_qbits];
         if(n_qbits == 1){
-            out[0] = qbit.get().blochVec();
+            out[0] = qbit.get().asQbit().get().blochVec();
         }
         // System.out.printf("%s %s %s %s\n", n_qbits, out.length, qbit, qbit.isPresent());
         // return out;
         blochVecs = out;
     }
 
-    public QbitEntity(BlockPos pos, BlockState state, Optional<Qbit> initialQbit) {
+    public QbitEntity(BlockPos pos, BlockState state, Optional<State> initialQbit) {
         super(ModBlockEntities.QBIT_ENTITY, pos, state);
         this.qbit = initialQbit;
         updateBlochVecs();
         isVisible = true;
+        qbit_pos = 0;
+        entangled = new BlockPos[1];
+        entangled[0] = pos;
     }
     public QbitEntity(BlockPos pos, BlockState state, Qbit initialQbit) {
         this(pos, state, Optional.of(initialQbit));
@@ -60,17 +73,25 @@ public class QbitEntity extends BlockEntity{
         this(pos, state, Optional.empty());
     }
 
-
-    private void writeQbitNBT(NbtCompound nbt, Qbit qbit, String name) {
-        nbt.putDouble(name + "_x_re", qbit.get(0).re);
-        nbt.putDouble(name + "_x_im", qbit.get(0).im);
-        nbt.putDouble(name + "_y_re", qbit.get(1).re);
-        nbt.putDouble(name + "_y_im", qbit.get(1).im);
+    private void writeStateNBT(NbtCompound nbt, State qbit, String name) {
+        nbt.putInt("state_size", qbit.size());
+        NbtList state_coefficients = new NbtList();
+        for (Complex z : qbit.getVec()) {
+            state_coefficients.add(NbtDouble.of(z.re));
+            state_coefficients.add(NbtDouble.of(z.im));
+        }
+        nbt.put("state_coefficients", state_coefficients);
     }
+    // private void writeQbitNBT(NbtCompound nbt, Qbit qbit, String name) {
+    //     nbt.putDouble(name + "_x_re", qbit.get(0).re);
+    //     nbt.putDouble(name + "_x_im", qbit.get(0).im);
+    //     nbt.putDouble(name + "_y_re", qbit.get(1).re);
+    //     nbt.putDouble(name + "_y_im", qbit.get(1).im);
+    // }
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		if(qbit.isPresent()){
-            writeQbitNBT(nbt, qbit.get(), "qbit0");
+            writeStateNBT(nbt, qbit.get(), "qbit0");
         }
 
         // int[] blochComponents = new int[blochVecs.length * 3];
@@ -85,21 +106,57 @@ public class QbitEntity extends BlockEntity{
 		super.writeNbt(nbt, registryLookup);
 	}
 
-    private Optional<Qbit> readQbitNBT(NbtCompound nbt, String name) {
-        var re0 = nbt.getDouble(name + "_x_re");
-        var im0 = nbt.getDouble(name + "_x_im");
-        var re1 = nbt.getDouble(name + "_y_re");
-        var im1 = nbt.getDouble(name + "_y_im");
-        if(re0.isPresent() && im0.isPresent() && re1.isPresent() && im1.isPresent()){
-            return Optional.of(new Qbit(
-                new Complex(re0.get(), im0.get()),
-                new Complex(re1.get(), im1.get())
-            ));
+    private Optional<State> readQbitNBT(NbtCompound nbt, String name) {
+        var state_coefficients = nbt.getList("state_coefficients");
+        if(state_coefficients.isPresent()){
+            
+            var s = nbt.getInt("state_size", 0);
+            Complex[] v = new Complex[s];
+            for (int i = 0; i < s; i++) {
+                var re = state_coefficients.get().getDouble(2*i).get();
+                var im = state_coefficients.get().getDouble(2*i+1).get();
+                v[i] = new Complex(re, im);
+            }
+            return Optional.of(new State(v));
         }
         else{
             return Optional.empty();
         }
     }
+    public void entangle(QbitEntity other){
+        if(! Arrays.asList(entangled).contains(other.getPos()) ){
+            return;
+        }
+        int n = qbit.get().numQbits();
+        entangled = ArrayUtils.addAll(entangled, other.getEntangled());
+        qbit = Optional.of(State.tensor(qbit.get(), other.qbit.get()));
+        other.get_entangled(n, qbit, entangled.clone());
+    }
+    public void get_entangled(int other_n, Optional<State> state, BlockPos[] ent){
+        qbit_pos = other_n + qbit_pos;
+        qbit = state;
+        entangled = ent;
+    }
+    public boolean disentangle(World world){
+        if( qbit.get().numQbits() == 2 ){
+            var bits = qbit.get().decomposeState();
+            if(!bits.isPresent()) { return false; }
+            for (var p : entangled) {
+                if(world.getBlockEntity(p) instanceof QbitEntity qbitEntity){
+                    qbitEntity.getDisentangled(bits.get());
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    public void getDisentangled(Qbit[] bits){
+        qbit = Optional.of(bits[qbit_pos]);
+        qbit_pos = 0;
+        entangled = new BlockPos[1];
+        entangled[0] = getPos();
+    }
+
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(nbt, registryLookup);

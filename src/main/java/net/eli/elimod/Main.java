@@ -30,7 +30,17 @@ public class Main {
         }
         State product1 = State.productState(Qbit.ONE, Qbit.ZERO, Qbit.ZERO);
         System.err.println(product1);
-        System.err.println((int)(Math.log(8) / Math.log(2)));
-        System.err.println(Math.round(7.9));
+        State product2 = State.tensor(Qbit.ONE, Qbit.ZERO, Qbit.ZERO);
+        // State product2 = State.tensor(Qbit.ONE, State.tensor(Qbit.ZERO, Qbit.ZERO));
+        System.err.println(product2);
+
+        // System.err.println((int)(Math.log(8) / Math.log(2)));
+        // System.err.println(Math.round(7.9));
+        // State[] decomposed = State.productState(Qbit.ONE, Qbit.ZERO).schmidtDecomposition();
+        // for (State state : decomposed) {
+        //     System.err.println(state);
+        // }
+        // System.err.println(State.projection(Qbit.ZERO, Qbit.ONE).actOn(Qbit.ZERO));
+        System.err.println(Gate.controled_by1(Gate.X));
     }
   }

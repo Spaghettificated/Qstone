@@ -25,16 +25,10 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.block.WireOrientation;
 
-public class QbitWireBlock extends QbitBlock {
-	public static final EnumProperty<Direction> FACING = Properties.FACING;
+public class QbitWireBlock extends QbitSpreadBlock {
 
 	public QbitWireBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.SOUTH));
-    }
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
     }
 
     @Override
@@ -42,57 +36,21 @@ public class QbitWireBlock extends QbitBlock {
 		return createCodec(QbitWireBlock::new);
 	}
     
-// 
-    @Override
-	protected void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		if (!state.isOf(oldState.getBlock())) {
-			if (!world.isClient() && !world.getBlockTickScheduler().isQueued(pos, this)) {
-				BlockState blockState = state;
-				world.setBlockState(pos, blockState, Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
-				// this.updateNeighbors(world, pos, blockState);
-                neighborUpdate(state, world, pos, this, null, collidable);
-			}
-		}
-	}
 
-	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(FACING, ctx.getPlayerLookDirection().getOpposite().getOpposite());
-	}
+
     
 
-	@Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!(world.getBlockEntity(pos) instanceof QbitEntity blockEntity)) {
-            return super.onUse(state, world, pos, player, hit);
-        }
-
-        // updateNeighbors(world, pos, state);
-
-        return ActionResult.SUCCESS;
-    }
 
 
     // @Override
     protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
-        
-        // updateNeighbors(world, pos, state);
-
-        Direction direction = state.get(FACING);
-        // if (!(world.getBlockEntity(pos) instanceof QbitEntity thisQbitEntity)) {
-        //     return;
-        // }
-        if ((world.getBlockEntity(pos.offset(direction)) instanceof QbitEntity otherQbitEntity)) {
-            // thisQbitEntity.setQbitOption(otherQbitEntity.getQbit());
-            setState(otherQbitEntity.getQbit(), state, world, pos, sourceBlock);
+        var source = sourceQbit(state, world, pos);
+        if (source.isPresent()) {
+            setState(source.get().getQbit(), state, world, pos, sourceBlock);
         }
         else{
-            // thisQbitEntity.setQbitOption(Optional.empty());
             setState(Optional.empty(), state, world, pos, sourceBlock);
         }
-        
-        // if(pos == )
-		// world.updateNeighborsExcept(pos, this, direction, null );
     }
 
     @Override

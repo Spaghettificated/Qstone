@@ -1,5 +1,6 @@
 package net.eli.elimod.quantum;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
@@ -23,76 +24,69 @@ import net.minecraft.world.World;
 import net.minecraft.world.block.WireOrientation;
 
 // public class QbitGateBlock {
-public class QbitGateBlock extends QbitBlock {
-    public static final EnumProperty<Direction> FACING = Properties.FACING;
+public class QbitGateBlock extends QbitSpreadBlock {
     private Gate gate;
+    private Optional<BlockPos> control;
 
 	public QbitGateBlock(Settings settings, Gate gate) {
         super(settings);
         this.gate = gate;
-        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.SOUTH));
+        control = Optional.empty();
     }
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
-    }
-
     @Override
 	protected MapCodec<? extends QbitBlock> getCodec() {
 		return createCodec(QbitWireBlock::new);
 	}
 
-    @Override
-	protected void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		if (!state.isOf(oldState.getBlock())) {
-			if (!world.isClient() && !world.getBlockTickScheduler().isQueued(pos, this)) {
-				BlockState blockState = state;
-				world.setBlockState(pos, blockState, Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
-				// this.updateNeighbors(world, pos, blockState);
-                neighborUpdate(state, world, pos, this, null, collidable);
-			}
-		}
-	}
-
-
-	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(FACING, ctx.getPlayerLookDirection().getOpposite().getOpposite());
-	}
     
-
-	@Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!(world.getBlockEntity(pos) instanceof QbitEntity blockEntity)) {
-            return super.onUse(state, world, pos, player, hit);
-        }
-
-        // updateNeighbors(world, pos, state);
-
-        return ActionResult.SUCCESS;
-    }
 
 
     // @Override
-    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
-        
-        // updateNeighbors(world, pos, state);
+    // protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
+    //     Direction direction = state.get(FACING);
+    //     if ((world.getBlockEntity(pos.offset(direction)) instanceof QbitEntity otherQbitEntity)) {
+    //         if( control.isPresent() ) {
+                
+    //         }
+    //         else{
+    //             setState(otherQbitEntity.getQbit().map(q -> gate.actOn(q)), state, world, pos, sourceBlock);
+    //         }
+    //     }
+    //     else{
+    //         setState(Optional.empty(), state, world, pos, sourceBlock);
+    //     }
 
-        Direction direction = state.get(FACING);
-        // if (!(world.getBlockEntity(pos) instanceof QbitEntity thisQbitEntity)) {
-        //     return;
-        // }
-        if ((world.getBlockEntity(pos.offset(direction)) instanceof QbitEntity otherQbitEntity)) {
-            // thisQbitEntity.setQbitOption(otherQbitEntity.getQbit());
-            setState(otherQbitEntity.getQbit().map(q -> gate.actOn(q)), state, world, pos, sourceBlock);
+    // }
+
+    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
+        Optional<QbitEntity> source = sourceQbit(state, world, pos);
+        if (source.isPresent()) {
+            var sourceQbit = source.get().getQbit().get();
+            if( control.isPresent()){
+                var controlPos = control.get();
+                QbitEntity controlSource = sourceQbit(world.getBlockState(controlPos), world, controlPos).get();
+                var controlSourceQbit = source.get().getQbit().get();
+
+                State entangled = State.tensor(sourceQbit, controlSourceQbit);
+                Gate controlled_gate = gate.controled_by1();
+                var disentangled = controlled_gate.actOn(entangled).decomposeState();
+                if(disentangled.isPresent()){
+                    setState(Optional.of(disentangled.get()[0]), state, world, pos, sourceBlock);
+                    setState(Optional.of(disentangled.get()[1]), world.getBlockState(pos), world, controlPos, sourceBlock);
+                }
+                else{
+
+                }
+
+                
+                // var controlSource = world.getBlockEntity(pos)
+            }
+            else{
+                setState(Optional.of(gate.actOn(sourceQbit)), state, world, pos, sourceBlock);
+            }
         }
         else{
-            // thisQbitEntity.setQbitOption(Optional.empty());
             setState(Optional.empty(), state, world, pos, sourceBlock);
         }
-        
-        // if(pos == )
-		// world.updateNeighborsExcept(pos, this, direction, null );
     }
-
 }

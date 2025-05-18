@@ -27,7 +27,7 @@ public abstract class QbitBlock extends BlockWithEntity {
 		return new QbitEntity(pos, state);
 	}
 
-	public void setState(Optional<Qbit> qbitOpt, BlockState state, World world, BlockPos pos, @Nullable Block sourceBlock){
+	public void setState(Optional<State> qbitOpt, BlockState state, World world, BlockPos pos, @Nullable Block sourceBlock){
 		if (!(world.getBlockEntity(pos) instanceof QbitEntity thisQbitEntity)) {
             return;
         }
