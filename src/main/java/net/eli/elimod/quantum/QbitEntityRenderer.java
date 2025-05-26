@@ -34,7 +34,8 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
         new ItemStack(Items.BLACK_CONCRETE),
     };
     public static final double marker_size = 0.4;
-    public static final double marigin_size = 0.05;
+    public static final double marigin_size = 0.03;
+    public int marker_id =0;
  
     public QbitEntityRenderer(BlockEntityRendererFactory.Context ctx) {}
 
@@ -47,8 +48,16 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
         // entity.updateBlochVecs();
         Vec3d[] blochVecs = entity.getBlochVecs();
 
-        for (int i = 0; i < blochVecs.length; i++) {
-            Vec3d bloch = blochVecs[i];
+        if (entity.updated) {
+            marker_id = entity.marker_id;
+            entity.updated = false;
+        }
+
+        // int j = entity.marker_id;
+        int j = marker_id;
+
+        for (int i = 0 +j; i < blochVecs.length +j; i++) {
+            Vec3d bloch = blochVecs[i -j];
             ItemStack markerItem = markerItems[i % markerItems.length];
             
             matrices.push();

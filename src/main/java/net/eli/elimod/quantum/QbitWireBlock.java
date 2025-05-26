@@ -37,7 +37,16 @@ public class QbitWireBlock extends QbitSpreadBlock {
 	}
     
 
+	// @Override
+    // protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+    //     if (!(world.getBlockEntity(pos) instanceof QbitEntity blockEntity)) {
+    //         return super.onUse(state, world, pos, player, hit);
+    //     }
 
+    //     blockEntity.marker_id++;
+    //     blockEntity.updated = true;
+    //     return ActionResult.SUCCESS;
+    // }
     
 
 
@@ -55,7 +64,8 @@ public class QbitWireBlock extends QbitSpreadBlock {
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
-        float diff = 1f/8f;
+        // float diff = 1f/8f;
+        float diff = 3f/8f;
         return VoxelShapes.cuboid(0.5f - diff, 0.5f - diff, 0.5f - diff, 0.5f + diff, 0.5f + diff, 0.5f + diff);
     }
 }

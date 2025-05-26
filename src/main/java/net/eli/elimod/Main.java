@@ -2,6 +2,7 @@ package net.eli.elimod;
 
 import net.eli.elimod.quantum.Complex;
 import net.eli.elimod.quantum.Gate;
+import net.eli.elimod.quantum.MultiQbit;
 import net.eli.elimod.quantum.Qbit;
 import net.eli.elimod.quantum.State;
 
@@ -42,5 +43,8 @@ public class Main {
         // }
         // System.err.println(State.projection(Qbit.ZERO, Qbit.ONE).actOn(Qbit.ZERO));
         System.err.println(Gate.controled_by1(Gate.X));
+        var m = new MultiQbit(0);
+        m.increment();
+        System.err.println(m.getI());
     }
   }

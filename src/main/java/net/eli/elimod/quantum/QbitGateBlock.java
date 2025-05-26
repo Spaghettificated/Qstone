@@ -1,5 +1,6 @@
 package net.eli.elimod.quantum;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -37,7 +38,15 @@ public class QbitGateBlock extends QbitSpreadBlock {
 	protected MapCodec<? extends QbitBlock> getCodec() {
 		return createCodec(QbitWireBlock::new);
 	}
-
+    public BlockPos[] controlBits(BlockState state, World world, BlockPos pos){
+        Direction facing = state.get(FACING);
+        // var x = new ArrayList(Direction.values()).removeIf(x -> x==state.get("FACING").get();)
+       var v = Arrays.stream(Direction.values())
+                     .filter(x -> x!=facing)
+                     .map(x -> pos.offset(x))
+                     .toArray(BlockPos[]::new);
+       return v;
+    }
     
 
 

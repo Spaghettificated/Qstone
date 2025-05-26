@@ -27,6 +27,8 @@ import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.world.World;
 
 public class QbitEntity extends BlockEntity{
+    public boolean updated = false;
+    public int marker_id = 0;
     public boolean isVisible;
     private Optional<State> qbit;
     private int qbit_pos;
@@ -88,13 +90,8 @@ public class QbitEntity extends BlockEntity{
     //     nbt.putDouble(name + "_y_re", qbit.get(1).re);
     //     nbt.putDouble(name + "_y_im", qbit.get(1).im);
     // }
-	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		if(qbit.isPresent()){
-            writeStateNBT(nbt, qbit.get(), "qbit0");
-        }
-
-        // int[] blochComponents = new int[blochVecs.length * 3];
+    private void writeBlochNBT(NbtCompound nbt) {
+        
         nbt.putInt("bloch_n", blochVecs.length);
         NbtList blochComponents = new NbtList();
         for (int i = 0; i < blochVecs.length * 3; i++) {
@@ -103,6 +100,15 @@ public class QbitEntity extends BlockEntity{
             blochComponents.add( NbtDouble.of(blochVecs[i/3].getComponentAlongAxis(Axis.values()[i%3])));
         }
         nbt.put("bloch_components", blochComponents);
+    }
+	@Override
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+		if(qbit.isPresent()){
+            writeStateNBT(nbt, qbit.get(), "qbit0");
+        }
+        writeBlochNBT( nbt);
+
+        // int[] blochComponents = new int[blochVecs.length * 3];
 		super.writeNbt(nbt, registryLookup);
 	}
 
@@ -123,6 +129,27 @@ public class QbitEntity extends BlockEntity{
             return Optional.empty();
         }
     }
+    private Vec3d[] readBlochNBT(NbtCompound nbt) {
+        int bloch_n = nbt.getInt("bloch_n").get();
+        var blochComponents = nbt.getList("bloch_components").get();
+        Vec3d[] newBlochVecs = new Vec3d[bloch_n];
+        for (int i = 0; i < bloch_n; i++) {
+            newBlochVecs[i] = new Vec3d(
+                blochComponents.getDouble(i).get(),
+                blochComponents.getDouble(i+1).get(),
+                blochComponents.getDouble(i+2).get()
+            );
+        }
+        return newBlochVecs;
+    }
+
+	@Override
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+		super.readNbt(nbt, registryLookup);
+        qbit = readQbitNBT(nbt, "qbit0");
+        blochVecs = readBlochNBT(nbt);
+	}
+
     public void entangle(QbitEntity other){
         if(! Arrays.asList(entangled).contains(other.getPos()) ){
             return;
@@ -157,22 +184,6 @@ public class QbitEntity extends BlockEntity{
         entangled[0] = getPos();
     }
 
-	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.readNbt(nbt, registryLookup);
-        qbit = readQbitNBT(nbt, "qbit0");
-        int bloch_n = nbt.getInt("bloch_n").get();
-        var blochComponents = nbt.getList("bloch_components").get();
-        Vec3d[] newBlochVecs = new Vec3d[bloch_n];
-        for (int i = 0; i < bloch_n; i++) {
-            newBlochVecs[i] = new Vec3d(
-                blochComponents.getDouble(i).get(),
-                blochComponents.getDouble(i+1).get(),
-                blochComponents.getDouble(i+2).get()
-            );
-        }
-        blochVecs = newBlochVecs;
-	}
 
     @Nullable
     @Override
