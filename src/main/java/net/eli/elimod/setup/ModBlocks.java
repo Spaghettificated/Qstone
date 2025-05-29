@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import net.eli.elimod.Elimod;
 import net.eli.elimod.quantum.Gate;
 import net.eli.elimod.quantum.Qbit;
+import net.eli.elimod.quantum.QbitControlBlock;
 import net.eli.elimod.quantum.QbitGateBlock;
 import net.eli.elimod.quantum.QbitSourceBlock;
 import net.eli.elimod.quantum.QbitWireBlock;
@@ -50,7 +51,6 @@ public class ModBlocks {
 	// 	AbstractBlock.Settings.create().nonOpaque(),
 	// 	true
 	// );
-	public static final Block[] QBIT_MAIN_BLOCKS = {QBIT_BLOCK, QBIT_WIRE};
 	// public static final Block[] QBIT_GATE_BLOCKS = {QBIT_GATE};
 	public static final Block[] QBIT_GATE_BLOCKS = new Block[Qbit.SINGLE_GATES.size()];
 	static{
@@ -67,6 +67,13 @@ public class ModBlocks {
 			i++;
 		}
 	}
+	public static final Block QBIT_CONTROL = registerBlock(
+		"qbit_control",
+		QbitControlBlock::new,
+		AbstractBlock.Settings.create().nonOpaque(),
+		true
+	);
+	public static final Block[] QBIT_MAIN_BLOCKS = {QBIT_BLOCK, QBIT_WIRE, QBIT_CONTROL};
 	public static final Block[] QBIT_BLOCKS = Stream.concat(Arrays.stream(QBIT_MAIN_BLOCKS), Arrays.stream(QBIT_GATE_BLOCKS)).toArray(Block[]::new);
 
 
@@ -86,9 +93,7 @@ public class ModBlocks {
             // itemGroup.add(QBIT_GATE.asItem());
         });
 		ItemGroupEvents.modifyEntriesEvent(ModItemGroups.QUANTUM_ITEM_GROUP_KEY).register(itemGroup -> {
-            itemGroup.add(QBIT_BLOCK.asItem());
-            itemGroup.add(QBIT_WIRE.asItem());
-			for (Block block : QBIT_GATE_BLOCKS) {
+			for (Block block : QBIT_BLOCKS) {
 				itemGroup.add(block.asItem());
 			}
             // itemGroup.add(QBIT_GATE.asItem());

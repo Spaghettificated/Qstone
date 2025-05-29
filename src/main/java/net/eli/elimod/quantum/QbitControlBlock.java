@@ -22,9 +22,8 @@ import net.minecraft.world.block.WireOrientation;
 
 public class QbitControlBlock extends QbitBlock {
     public static final EnumProperty<Direction> FACING = Properties.FACING;
-    private Optional<BlockPos> gate;
 
-	public QbitControlBlock(Settings settings, Gate gate) {
+	public QbitControlBlock(Settings settings) {
         super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.SOUTH));
     }

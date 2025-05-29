@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.MapCodec;
 
+import net.eli.elimod.setup.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
@@ -15,8 +16,11 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import net.minecraft.world.block.WireOrientation;
+import net.minecraft.world.tick.ScheduledTickView;
 
 // public class QbitGateBlock {
 public class QbitGateBlock extends QbitSpreadBlock {
@@ -51,6 +55,41 @@ public class QbitGateBlock extends QbitSpreadBlock {
                      .map(x -> pos.offset(x))
                      .toArray(BlockPos[]::new);
         return v;
+    }
+
+    @Override
+    protected BlockState getStateForNeighborUpdate(
+		BlockState state,
+		WorldView world,
+		ScheduledTickView tickView,
+		BlockPos pos,
+		Direction direction,
+		BlockPos neighborPos,
+		BlockState neighborState,
+		Random random
+	) {
+        if(state.get(IS_CONTROLLED, false)){
+            var dir = state.get(CONTROL_DIRECTION);
+            var neighbour = world.getBlockState(pos.offset(dir));
+            if(neighbour.getBlock() == ModBlocks.QBIT_CONTROL){
+                    if(neighbour.get(FACING) == dir.getOpposite()){
+                        return state;
+                    }
+                }
+        }
+
+        for (Direction dir : DIRECTIONS) {
+            if(dir != state.get(FACING)){
+                var neighbour = world.getBlockState(pos.offset(dir));
+                // neighbour.
+                if(neighbour.getBlock() == ModBlocks.QBIT_CONTROL){
+                    if(neighbour.get(FACING) == dir.getOpposite()){
+                        return state.with(IS_CONTROLLED, true).with(CONTROL_DIRECTION, dir);
+                    }
+                }
+            }
+        }
+        return state.with(IS_CONTROLLED, false);
     }
 
     protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
