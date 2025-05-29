@@ -1,9 +1,14 @@
 package net.eli.elimod.quantum;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
@@ -12,6 +17,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 @Environment(EnvType.CLIENT)
@@ -53,29 +59,42 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
             entity.updated = false;
         }
 
+        
+
         // int j = entity.marker_id;
         int j = marker_id;
+        Vec3d center = new Vec3d(0.5, 0.5, 0.5);
+        matrices.push();
+        matrices.translate(center);
 
         for (int i = 0 +j; i < blochVecs.length +j; i++) {
             Vec3d bloch = blochVecs[i -j];
             ItemStack markerItem = markerItems[i % markerItems.length];
+
+            var matrix = matrices.peek();
+            var lineBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
+            lineBuffer.vertex(matrix, new Vector3f(0,0,0)).color(1,0,1,255).normal(0, 1, 0);
+            lineBuffer.vertex(matrix, bloch.multiply(0.5- marker_size/4).toVector3f() ).color(1,0,1,255).normal(0, 1, 0);
+        
             
             matrices.push();
 
             // Move the item
-            Vec3d center = new Vec3d(0.5, 0.5, 0.5);
-            matrices.translate(center.add(bloch.multiply(0.5 - marker_size/4. - marigin_size)));
+            matrices.translate(bloch.multiply(0.5 - marker_size/4. - marigin_size));
             matrices.scale((float)marker_size, (float)marker_size, (float)marker_size);
      
             // Rotate the item
             // matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((entity.getWorld().getTime() + tickDelta) * 4));
     
-            int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up());
+            int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos());
             MinecraftClient.getInstance().getItemRenderer().renderItem(markerItem, ItemDisplayContext.FIXED, lightAbove, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
      
             // Mandatory call after GL calls
             matrices.pop();
+            
         }     
+        
+        matrices.pop();
     }
  
     

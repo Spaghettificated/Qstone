@@ -9,16 +9,10 @@ import org.jetbrains.annotations.Nullable;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -26,13 +20,24 @@ import net.minecraft.world.block.WireOrientation;
 
 // public class QbitGateBlock {
 public class QbitGateBlock extends QbitSpreadBlock {
+    public static final BooleanProperty IS_CONTROLLED = BooleanProperty.of("is_controlled");
+    public static final EnumProperty<Direction> CONTROL_DIRECTION = EnumProperty.of("control_direction", Direction.class);
     private Gate gate;
-    private Optional<BlockPos> control;
+    // private Optional<BlockPos> control;
 
 	public QbitGateBlock(Settings settings, Gate gate) {
         super(settings);
         this.gate = gate;
-        control = Optional.empty();
+        // control = Optional.empty();
+        this.setDefaultState(this.stateManager.getDefaultState()
+                .with(IS_CONTROLLED, false)
+                .with(CONTROL_DIRECTION, Direction.NORTH));
+    }
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        super.appendProperties(builder);
+        builder.add(IS_CONTROLLED);
+        builder.add(CONTROL_DIRECTION);
     }
     @Override
 	protected MapCodec<? extends QbitBlock> getCodec() {
@@ -41,38 +46,23 @@ public class QbitGateBlock extends QbitSpreadBlock {
     public BlockPos[] controlBits(BlockState state, World world, BlockPos pos){
         Direction facing = state.get(FACING);
         // var x = new ArrayList(Direction.values()).removeIf(x -> x==state.get("FACING").get();)
-       var v = Arrays.stream(Direction.values())
+        var v = Arrays.stream(Direction.values())
                      .filter(x -> x!=facing)
                      .map(x -> pos.offset(x))
                      .toArray(BlockPos[]::new);
-       return v;
+        return v;
     }
-    
-
-
-    // @Override
-    // protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
-    //     Direction direction = state.get(FACING);
-    //     if ((world.getBlockEntity(pos.offset(direction)) instanceof QbitEntity otherQbitEntity)) {
-    //         if( control.isPresent() ) {
-                
-    //         }
-    //         else{
-    //             setState(otherQbitEntity.getQbit().map(q -> gate.actOn(q)), state, world, pos, sourceBlock);
-    //         }
-    //     }
-    //     else{
-    //         setState(Optional.empty(), state, world, pos, sourceBlock);
-    //     }
-
-    // }
 
     protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
+        
+        
         Optional<QbitEntity> source = sourceQbit(state, world, pos);
         if (source.isPresent()) {
             var sourceQbit = source.get().getQbit().get();
-            if( control.isPresent()){
-                var controlPos = control.get();
+            // if( control.isPresent()){
+            if( state.get(IS_CONTROLLED, false)){
+                var controlPos = pos.offset(state.get(CONTROL_DIRECTION));
+                // var controlPos = control.get();
                 QbitEntity controlSource = sourceQbit(world.getBlockState(controlPos), world, controlPos).get();
                 var controlSourceQbit = source.get().getQbit().get();
 
