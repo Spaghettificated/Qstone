@@ -72,20 +72,21 @@ public class QbitGateBlock extends QbitSpreadBlock {
             var dir = state.get(CONTROL_DIRECTION);
             var neighbour = world.getBlockState(pos.offset(dir));
             if(neighbour.getBlock() == ModBlocks.QBIT_CONTROL){
-                    if(neighbour.get(FACING) == dir.getOpposite()){
-                        return state;
-                    }
-                }
+                // if(neighbour.get(FACING) == dir.getOpposite()){
+                //     return state;
+                // }
+                return state;
+            }
         }
 
         for (Direction dir : DIRECTIONS) {
             if(dir != state.get(FACING)){
                 var neighbour = world.getBlockState(pos.offset(dir));
-                // neighbour.
                 if(neighbour.getBlock() == ModBlocks.QBIT_CONTROL){
-                    if(neighbour.get(FACING) == dir.getOpposite()){
-                        return state.with(IS_CONTROLLED, true).with(CONTROL_DIRECTION, dir);
-                    }
+                    // if(neighbour.get(FACING) == dir.getOpposite()){
+                    //     return state.with(IS_CONTROLLED, true).with(CONTROL_DIRECTION, dir);
+                    // }
+                    return state.with(IS_CONTROLLED, true).with(CONTROL_DIRECTION, dir);
                 }
             }
         }
@@ -103,17 +104,17 @@ public class QbitGateBlock extends QbitSpreadBlock {
                 var controlPos = pos.offset(state.get(CONTROL_DIRECTION));
                 // var controlPos = control.get();
                 QbitEntity controlSource = sourceQbit(world.getBlockState(controlPos), world, controlPos).get();
-                var controlSourceQbit = source.get().getQbit().get();
+                var controlSourceQbit = controlSource.getQbit().get();
 
                 State entangled = State.tensor(sourceQbit, controlSourceQbit);
                 Gate controlled_gate = gate.controled_by1();
                 var disentangled = controlled_gate.actOn(entangled).decomposeState();
                 if(disentangled.isPresent()){
                     setState(Optional.of(disentangled.get()[0]), state, world, pos, sourceBlock);
-                    setState(Optional.of(disentangled.get()[1]), world.getBlockState(pos), world, controlPos, sourceBlock);
+                    setState(Optional.of(disentangled.get()[1]), world.getBlockState(controlPos), world, controlPos, sourceBlock);
                 }
                 else{
-
+                    return;
                 }
 
                 
