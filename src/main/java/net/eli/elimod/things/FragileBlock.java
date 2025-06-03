@@ -19,11 +19,14 @@ public class FragileBlock extends Block {
     @Override
     public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
         super.onPlaced(world, pos, state, placer, itemStack);
-        world.scheduleBlockTick(pos, this, fuseTime);
+        setDemise(world, pos);
     }
     @Override
     protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         super.scheduledTick(state, world, pos, random);
         world.breakBlock(pos, true);
+    }
+    public void setDemise(World world, BlockPos pos){
+        world.scheduleBlockTick(pos, this, fuseTime);
     }
 }

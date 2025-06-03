@@ -2,6 +2,7 @@ package net.eli.elimod;
 
 import net.eli.elimod.quantum.Qbit;
 import net.eli.elimod.setup.ModBlocks;
+import net.eli.elimod.setup.ModDispenserBehaviour;
 import net.eli.elimod.setup.ModItemGroups;
 import net.eli.elimod.setup.ModItems;
 import net.fabricmc.api.ModInitializer;
@@ -21,5 +22,6 @@ public class Elimod implements ModInitializer {
 		ModItemGroups.RegisterItemGroups();
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
+		ModDispenserBehaviour.registerDispenserBehaviours();
 	}
 }
