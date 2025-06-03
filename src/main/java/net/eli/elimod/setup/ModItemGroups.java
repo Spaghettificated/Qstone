@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier;
 public class ModItemGroups {
     public static final RegistryKey<ItemGroup> MISC_ITEM_GROUP_KEY = RegistryKey.of(Registries.ITEM_GROUP.getKey(), Identifier.of(Elimod.MOD_ID, "itemgroup.misc"));
     public static final ItemGroup MISC_ITEM_GROUP = FabricItemGroup.builder()
-            .icon(() -> new ItemStack(ModBlocks.TEST_BLOCK.asItem()))
+            .icon(() -> new ItemStack(ModBlocks.FRAGILE_BLOCK.asItem()))
             .displayName(Text.translatable("miscellaneous"))
             .build();
     public static final RegistryKey<ItemGroup> QUANTUM_ITEM_GROUP_KEY = RegistryKey.of(Registries.ITEM_GROUP.getKey(), Identifier.of(Elimod.MOD_ID, "itemgroup.quantum"));
