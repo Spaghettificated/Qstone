@@ -45,7 +45,7 @@ public class QbitSourceBlock extends QbitBlock {
 
 		// blockEntity.setQbit(Qbit.fromDirection(dir));
 		setState(Optional.of(Qbit.fromDirection(dir)), state, world, pos, this);
-        player.sendMessage(Text.literal( "Set the qbit to " + blockEntity.getQbit().get().toString() ), true);
+        player.sendMessage(Text.literal( "Set the qbit to " + blockEntity.getState().get().toString() ), true);
 
         return ActionResult.SUCCESS;
     }

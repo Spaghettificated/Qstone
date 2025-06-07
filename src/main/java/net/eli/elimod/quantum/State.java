@@ -2,7 +2,7 @@ package net.eli.elimod.quantum;
 
 import java.util.Optional;
 
-import net.eli.Utils;
+import net.eli.elimod.utils.Utils;
 
 public class State {
     protected Complex[] vec;

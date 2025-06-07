@@ -98,13 +98,13 @@ public class QbitGateBlock extends QbitSpreadBlock {
         
         Optional<QbitEntity> source = sourceQbit(state, world, pos);
         if (source.isPresent()) {
-            var sourceQbit = source.get().getQbit().get();
+            var sourceQbit = source.get().getState().get();
             // if( control.isPresent()){
             if( state.get(IS_CONTROLLED, false)){
                 var controlPos = pos.offset(state.get(CONTROL_DIRECTION));
                 // var controlPos = control.get();
                 QbitEntity controlSource = sourceQbit(world.getBlockState(controlPos), world, controlPos).get();
-                var controlSourceQbit = controlSource.getQbit().get();
+                var controlSourceQbit = controlSource.getState().get();
 
                 State entangled = State.tensor(sourceQbit, controlSourceQbit);
                 Gate controlled_gate = gate.controled_by1();

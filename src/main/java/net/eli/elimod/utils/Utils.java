@@ -1,4 +1,4 @@
-package net.eli;
+package net.eli.elimod.utils;
 
 public class Utils {
     public static int powi(double a, double b){

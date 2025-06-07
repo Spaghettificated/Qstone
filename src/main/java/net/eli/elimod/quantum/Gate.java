@@ -1,6 +1,6 @@
 package net.eli.elimod.quantum;
 
-import net.eli.Utils;
+import net.eli.elimod.utils.Utils;
 
 public class Gate {
     Complex[][] mat;

@@ -8,17 +8,38 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
+import net.eli.elimod.utils.OptDirection;;
 
 
 public abstract class QbitBlock extends BlockWithEntity {
-    public QbitBlock(Settings settings) {
+	public static final EnumProperty<OptDirection> SOURCE = EnumProperty.of("qbit_source", OptDirection.class);
+	public static final EnumProperty<OptDirection> TARGET = EnumProperty.of("qbit_target", OptDirection.class);
+	private boolean isSource;
+	private boolean isTarget;
+    public boolean isSource() { return isSource; }
+	public boolean isTarget() { return isTarget; }
+
+
+	public QbitBlock(Settings settings) {
 		super(settings);
 	}
+
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        builder.add(SOURCE);
+        builder.add(TARGET);
+        super.appendProperties(builder);
+    }
 
 
 	@Nullable
@@ -31,8 +52,8 @@ public abstract class QbitBlock extends BlockWithEntity {
 		if (!(world.getBlockEntity(pos) instanceof QbitEntity thisQbitEntity)) {
             return;
         }
-		if(!thisQbitEntity.getQbit().equals(qbitOpt)){
-			thisQbitEntity.setQbitOption(qbitOpt);
+		if(!thisQbitEntity.getState().equals(qbitOpt)){
+			thisQbitEntity.setStateOption(qbitOpt);
 			thisQbitEntity.markDirty();
 			world.updateListeners(pos, state, state, 0);
 			for (Direction dir : Direction.values()) {
@@ -46,12 +67,60 @@ public abstract class QbitBlock extends BlockWithEntity {
 			}
 			// world.updateNeighbors(pos, sourceBlock);
 			for (var player : world.getPlayers()) {
-				player.sendMessage(Text.literal( "update qbit to" + thisQbitEntity.getQbit()), true);
+				player.sendMessage(Text.literal( "update qbit to" + thisQbitEntity.getState()), true);
 			}
 		}
-
-
 	}
+
+	// public boolean reciveQbit(){
+		
+	public OptDirection findTarget(BlockState state, WorldView world, BlockPos pos){
+		for (Direction dir : Direction.values()) {
+			var targetDir = world.getBlockState(pos.offset(dir)).get(SOURCE, OptDirection.NONE);
+			if( targetDir == OptDirection.from(dir.getOpposite()) ){
+				return OptDirection.from(dir);
+			}
+		}
+		return OptDirection.NONE;
+	}
+	// }
+	@Override
+	protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView,
+			BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+			var new_state = state;
+			boolean state_changed = false;
+			if (this.isSource()) {
+				var neighborSourceDir = neighborState.get(SOURCE, OptDirection.NONE);
+				var targetDir = state.get(TARGET, OptDirection.NONE);
+
+				if( targetDir.isSome() && targetDir.getDirection() == direction){ // jak target zniknął, to go usuń
+					if ( neighborSourceDir != OptDirection.from(direction.getOpposite())){
+						// new_state = new_state.with(TARGET, OptDirection.NONE); // maybe look for other possible directions
+						new_state = new_state.with(TARGET, findTarget(state, world, pos));
+						state_changed = true;
+					}
+				}
+
+				
+				if (neighborSourceDir == OptDirection.from(direction.getOpposite())){ // jak pojawił się nowy target to go zmień
+					new_state = new_state.with(TARGET, OptDirection.from(direction));
+					state_changed = true;
+				}
+
+
+			}
+			// if (this.isTarget()) {
+			// 	var sourceDir = state.get(SOURCE, OptDirection.NONE);
+			// }
+		// TODO Auto-generated method stub
+		world.getBlockEntity(pos).markDirty();
+		// world.getBlockEntity(pos).
+		if (state_changed){
+			state.initShapeCache();
+		}
+		return super.getStateForNeighborUpdate(new_state, world, tickView, pos, direction, neighborPos, neighborState, random);
+	}
+	
 
 
 }
