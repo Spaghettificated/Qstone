@@ -2,6 +2,7 @@ package net.eli.elimod.quantum;
 
 import java.util.Optional;
 
+import net.eli.elimod.utils.OptDirection;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemPlacementContext;
@@ -17,12 +18,13 @@ public abstract class QbitSpreadBlock extends QbitBlock{
 
     public QbitSpreadBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
+        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH).with(SOURCE, OptDirection.NONE));
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+        super.appendProperties(builder);
     }
 
     protected BlockPos sourcePos(BlockState state, BlockPos pos){
@@ -49,6 +51,7 @@ public abstract class QbitSpreadBlock extends QbitBlock{
 	}
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(FACING, ctx.getPlayerLookDirection().getOpposite().getOpposite());
+        var dir = ctx.getPlayerLookDirection().getOpposite().getOpposite();
+		return this.getDefaultState().with(FACING, dir).with(SOURCE, OptDirection.from(dir));
 	}
 }

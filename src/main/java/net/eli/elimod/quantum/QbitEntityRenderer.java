@@ -3,6 +3,7 @@ package net.eli.elimod.quantum;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import net.eli.elimod.utils.OptDirection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -48,16 +49,12 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
     @Override
     public void render(QbitEntity entity, float tickDelta, MatrixStack matrices,
             VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        if(!entity.isVisible){
-            return;
-        }
+        // if(!entity.isVisible){
+        //     return;
+        // }
         // entity.updateBlochVecs();
         Vec3d[] blochVecs = entity.getBlochVecs();
 
-        if (entity.updated) {
-            marker_id = entity.marker_id;
-            entity.updated = false;
-        }
 
         
 
@@ -72,10 +69,22 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
             ItemStack markerItem = markerItems[i % markerItems.length];
 
             var matrix = matrices.peek();
-            var lineBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
-            lineBuffer.vertex(matrix, new Vector3f(0,0,0)).color(1,0,1,255).normal(0, 1, 0);
-            lineBuffer.vertex(matrix, bloch.multiply(0.5- marker_size/4).toVector3f() ).color(1,0,1,255).normal(0, 1, 0);
-        
+            // var lineBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
+            // lineBuffer.vertex(matrix, new Vector3f(0,0,0)).color(1,0,1,255).normal(0, 1, 0);
+            // lineBuffer.vertex(matrix, bloch.multiply(0.5- marker_size/4).toVector3f() ).color(1,0,1,255).normal(0, 1, 0);
+
+            // var target = entity.getCachedState().get(QbitBlock.TARGET, OptDirection.NONE);
+            // if (target.isSome()){
+            //     var targetBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
+            //     targetBuffer.vertex(matrix, new Vector3f(0,0,0)).color(1,0,0,255).normal(0, 1, 0);
+            //     targetBuffer.vertex(matrix, target.getDirection().getUnitVector().mul(0.5f) ).color(1,0,0,255).normal(0, 1, 0);
+            // }
+            var source = entity.getCachedState().get(QbitBlock.SOURCE, OptDirection.NONE);
+            if (source.isSome()){
+                var sourceBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
+                sourceBuffer.vertex(matrix, new Vector3f(0,0,0)).color(0,1,0,255).normal(0, 1, 0);
+                sourceBuffer.vertex(matrix, source.getDirection().getUnitVector().mul(0.5f) ).color(0,1,0,255).normal(0, 1, 0);
+            }
             
             matrices.push();
 

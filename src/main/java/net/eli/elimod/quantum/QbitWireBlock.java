@@ -19,11 +19,14 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import net.minecraft.world.block.WireOrientation;
+import net.minecraft.world.tick.ScheduledTickView;
 
 public class QbitWireBlock extends QbitSpreadBlock {
 
@@ -55,7 +58,7 @@ public class QbitWireBlock extends QbitSpreadBlock {
     protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
         var source = sourceQbit(state, world, pos);
         if (source.isPresent()) {
-            setState(source.get().getQbit(), state, world, pos, sourceBlock);
+            setState(source.get().getState(), state, world, pos, sourceBlock);
         }
         else{
             setState(Optional.empty(), state, world, pos, sourceBlock);
@@ -68,4 +71,5 @@ public class QbitWireBlock extends QbitSpreadBlock {
         float diff = 3f/8f;
         return VoxelShapes.cuboid(0.5f - diff, 0.5f - diff, 0.5f - diff, 0.5f + diff, 0.5f + diff, 0.5f + diff);
     }
+
 }
