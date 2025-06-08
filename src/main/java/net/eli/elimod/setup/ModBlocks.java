@@ -27,8 +27,8 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 
 public class ModBlocks {
-    public static final Block TEST_BLOCK = registerBlock(
-		"test_block",
+    public static final Block FRAGILE_BLOCK = registerBlock(
+		"fragile_block",
 		FragileBlock::new,
 		AbstractBlock.Settings.create().sounds(BlockSoundGroup.GRASS),
 		true
@@ -89,7 +89,7 @@ public class ModBlocks {
             // itemGroup.add(QBIT_GATE.asItem());
         });
 		ItemGroupEvents.modifyEntriesEvent(ModItemGroups.MISC_ITEM_GROUP_KEY).register(itemGroup -> {
-            itemGroup.add(TEST_BLOCK.asItem());
+            itemGroup.add(FRAGILE_BLOCK.asItem());
             // itemGroup.add(QBIT_GATE.asItem());
         });
 		ItemGroupEvents.modifyEntriesEvent(ModItemGroups.QUANTUM_ITEM_GROUP_KEY).register(itemGroup -> {

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "elimod:block/fragile_block"
+    }
+  }
+}

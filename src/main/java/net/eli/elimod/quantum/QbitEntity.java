@@ -1,4 +1,4 @@
-package net.eli.elimod.quantum;
+ package net.eli.elimod.quantum;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -129,12 +129,7 @@ public class QbitEntity extends BlockEntity{
         }
         nbt.put("state_coefficients", state_coefficients);
     }
-    // private void writeQbitNBT(NbtCompound nbt, Qbit qbit, String name) {
-    //     nbt.putDouble(name + "_x_re", qbit.get(0).re);
-    //     nbt.putDouble(name + "_x_im", qbit.get(0).im);
-    //     nbt.putDouble(name + "_y_re", qbit.get(1).re);
-    //     nbt.putDouble(name + "_y_im", qbit.get(1).im);
-    // }
+    
     private void writeBlochNBT(NbtCompound nbt) {
         
         nbt.putInt("bloch_n", blochVecs.length);
