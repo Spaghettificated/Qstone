@@ -24,8 +24,8 @@ import net.eli.elimod.utils.OptDirection;;
 public abstract class QbitBlock extends BlockWithEntity {
 	public static final EnumProperty<OptDirection> SOURCE = EnumProperty.of("qbit_source", OptDirection.class);
 	public static final EnumProperty<OptDirection> TARGET = EnumProperty.of("qbit_target", OptDirection.class);
-	private boolean isSource = true;
-	private boolean isTarget = true;
+	protected boolean isSource = true;
+	protected boolean isTarget = true;
     public boolean isSource() { return isSource; }
 	public boolean isTarget() { return isTarget; }
 
@@ -127,6 +127,33 @@ public abstract class QbitBlock extends BlockWithEntity {
 		return super.getStateForNeighborUpdate(new_state, world, tickView, pos, direction, neighborPos, neighborState, random);
 	}
 	
+	public boolean passQbit(BlockState state, World world, BlockPos pos){
+		var targetDir = state.get(TARGET, OptDirection.NONE);
+		if (targetDir.isSome()){
+			var neighbourPos = pos.offset(targetDir.getDirection());
+			var neighbour = world.getBlockState(neighbourPos);
+			if (neighbour.get(SOURCE, OptDirection.NONE).getDirection().getOpposite() == targetDir.getDirection()
+				&& world.getBlockEntity(neighbourPos) instanceof QbitEntity neighbourEntity
+				&& world.getBlockEntity(pos) instanceof QbitEntity thisEntity) {
+					boolean success;
+					if (isTarget())
+						success = neighbourEntity.takeFrom(thisEntity, world);
+					else
+						success = neighbourEntity.clone(thisEntity);
+					world.updateNeighbor(neighbourPos, this, null);
+					world.updateListeners(pos, state, state, 0);
+					world.updateListeners(neighbourPos, neighbour, neighbour, 0);
+					if(neighbour.getBlock() instanceof QbitBlock neighbourBlock)
+					neighbourBlock.reciveQbit(neighbour, world, neighbourPos);
+					return success;
+			}
+		}
+
+		return false;
+	}
+	public void reciveQbit(BlockState state, World world, BlockPos pos) {
+		
+	}
 
 
 }

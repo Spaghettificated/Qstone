@@ -11,6 +11,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
@@ -56,13 +57,13 @@ public class QbitWireBlock extends QbitSpreadBlock {
 
     // @Override
     protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
-        var source = sourceQbit(state, world, pos);
-        if (source.isPresent()) {
-            setState(source.get().getState(), state, world, pos, sourceBlock);
-        }
-        else{
-            setState(Optional.empty(), state, world, pos, sourceBlock);
-        }
+        // var source = sourceQbit(state, world, pos);
+        // if (source.isPresent()) {
+        //     setState(source.get().getState(), state, world, pos, sourceBlock);
+        // }
+        // else{
+        //     setState(Optional.empty(), state, world, pos, sourceBlock);
+        // }
     }
 
     @Override
@@ -70,6 +71,21 @@ public class QbitWireBlock extends QbitSpreadBlock {
         // float diff = 1f/8f;
         float diff = 3f/8f;
         return VoxelShapes.cuboid(0.5f - diff, 0.5f - diff, 0.5f - diff, 0.5f + diff, 0.5f + diff, 0.5f + diff);
+    }
+
+
+    @Override
+    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        super.scheduledTick(state, world, pos, random);
+        if( !passQbit(state, world, pos)){
+            world.scheduleBlockTick(pos, this, 2);
+        }
+    }
+
+    @Override
+    public void reciveQbit(BlockState state, World world, BlockPos pos) {
+        world.scheduleBlockTick(pos, this, 2);
+        super.reciveQbit(state, world, pos);
     }
 
 }

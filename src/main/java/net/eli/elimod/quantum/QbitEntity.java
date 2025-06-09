@@ -58,11 +58,14 @@ public class QbitEntity extends BlockEntity{
 
     public boolean clone(QbitEntity other){
         for (BlockPos pos : other.entangled) {
-            if (pos==getPos()) {return false; }
+            if (pos==getPos()) { return false; }
         }
         qbit_pos = other.qbit_pos;
+        System.out.println(String.format("target qbits: %d, source qubits: %d", entangled.length, other.entangled.length));
         entangled = other.entangled.clone();
-        entangled[qbit_pos] = getPos();
+        System.out.println(String.format("target qbits: %d, source qubits: %d", entangled.length, other.entangled.length));
+        if (entangled.length > 0)
+            { entangled[qbit_pos] = getPos(); }
         state = other.getState();
         blochVecs = other.getBlochVecs();
         this.markDirty();
