@@ -24,14 +24,15 @@ import net.eli.elimod.utils.OptDirection;;
 public abstract class QbitBlock extends BlockWithEntity {
 	public static final EnumProperty<OptDirection> SOURCE = EnumProperty.of("qbit_source", OptDirection.class);
 	public static final EnumProperty<OptDirection> TARGET = EnumProperty.of("qbit_target", OptDirection.class);
-	private boolean isSource;
-	private boolean isTarget;
+	private boolean isSource = true;
+	private boolean isTarget = true;
     public boolean isSource() { return isSource; }
 	public boolean isTarget() { return isTarget; }
 
 
 	public QbitBlock(Settings settings) {
 		super(settings);
+        this.setDefaultState(this.stateManager.getDefaultState().with(TARGET, OptDirection.NONE).with(SOURCE, OptDirection.NONE));
 	}
 
     @Override
@@ -89,11 +90,15 @@ public abstract class QbitBlock extends BlockWithEntity {
 			BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
 			var new_state = state;
 			boolean state_changed = false;
+			// System.out.println("qbit in " + world.getBlockState(pos).getBlock().getName() + " at " + pos.toString() + " is updating");
 			if (this.isSource()) {
 				var neighborSourceDir = neighborState.get(SOURCE, OptDirection.NONE);
 				var targetDir = state.get(TARGET, OptDirection.NONE);
 
+				// System.out.println("\tupdating target, starting target is: " + targetDir.toString());
+
 				if( targetDir.isSome() && targetDir.getDirection() == direction){ // jak target zniknął, to go usuń
+					// System.out.println("\t\tcuz target was lost");
 					if ( neighborSourceDir != OptDirection.from(direction.getOpposite())){
 						// new_state = new_state.with(TARGET, OptDirection.NONE); // maybe look for other possible directions
 						new_state = new_state.with(TARGET, findTarget(state, world, pos));
@@ -103,6 +108,7 @@ public abstract class QbitBlock extends BlockWithEntity {
 
 				
 				if (neighborSourceDir == OptDirection.from(direction.getOpposite())){ // jak pojawił się nowy target to go zmień
+					// System.out.println("\t\tcuz we have new target at " + direction.asString());
 					new_state = new_state.with(TARGET, OptDirection.from(direction));
 					state_changed = true;
 				}
@@ -114,10 +120,10 @@ public abstract class QbitBlock extends BlockWithEntity {
 			// }
 		// TODO Auto-generated method stub
 		world.getBlockEntity(pos).markDirty();
-		// world.getBlockEntity(pos).
-		if (state_changed){
-			state.initShapeCache();
-		}
+		
+		// if (state_changed){
+		// 	state.initShapeCache();
+		// }
 		return super.getStateForNeighborUpdate(new_state, world, tickView, pos, direction, neighborPos, neighborState, random);
 	}
 	

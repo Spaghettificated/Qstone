@@ -39,9 +39,9 @@ public class QbitGateBlock extends QbitSpreadBlock {
     }
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
         builder.add(IS_CONTROLLED);
         builder.add(CONTROL_DIRECTION);
+        super.appendProperties(builder);
     }
     @Override
 	protected MapCodec<? extends QbitBlock> getCodec() {

@@ -18,7 +18,7 @@ public abstract class QbitSpreadBlock extends QbitBlock{
 
     public QbitSpreadBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH).with(SOURCE, OptDirection.NONE));
+        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
     }
 
     @Override
@@ -52,6 +52,6 @@ public abstract class QbitSpreadBlock extends QbitBlock{
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
         var dir = ctx.getPlayerLookDirection().getOpposite().getOpposite();
-		return this.getDefaultState().with(FACING, dir).with(SOURCE, OptDirection.from(dir));
+		return this.getDefaultState().with(FACING, dir).with(SOURCE, OptDirection.from(dir)).with(TARGET, OptDirection.NONE);
 	}
 }

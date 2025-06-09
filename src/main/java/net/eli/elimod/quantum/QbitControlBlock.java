@@ -30,6 +30,7 @@ public class QbitControlBlock extends QbitBlock {
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+        super.appendProperties(builder);
     }
 
     @Override

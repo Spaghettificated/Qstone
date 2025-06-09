@@ -73,17 +73,18 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
             // lineBuffer.vertex(matrix, new Vector3f(0,0,0)).color(1,0,1,255).normal(0, 1, 0);
             // lineBuffer.vertex(matrix, bloch.multiply(0.5- marker_size/4).toVector3f() ).color(1,0,1,255).normal(0, 1, 0);
 
-            // var target = entity.getCachedState().get(QbitBlock.TARGET, OptDirection.NONE);
-            // if (target.isSome()){
-            //     var targetBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
-            //     targetBuffer.vertex(matrix, new Vector3f(0,0,0)).color(1,0,0,255).normal(0, 1, 0);
-            //     targetBuffer.vertex(matrix, target.getDirection().getUnitVector().mul(0.5f) ).color(1,0,0,255).normal(0, 1, 0);
-            // }
+            var target = entity.getCachedState().get(QbitBlock.TARGET, OptDirection.NONE);
+            if (target.isSome()){
+                var targetBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
+                targetBuffer.vertex(matrix, new Vector3f(0,0,0)).color(255,0,0,255).normal(0, 1, 0);
+                targetBuffer.vertex(matrix, target.getDirection().getUnitVector().mul(0.5f) ).color(255,0,0,255).normal(0, 1, 0);
+            }
+
             var source = entity.getCachedState().get(QbitBlock.SOURCE, OptDirection.NONE);
             if (source.isSome()){
                 var sourceBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
-                sourceBuffer.vertex(matrix, new Vector3f(0,0,0)).color(0,1,0,255).normal(0, 1, 0);
-                sourceBuffer.vertex(matrix, source.getDirection().getUnitVector().mul(0.5f) ).color(0,1,0,255).normal(0, 1, 0);
+                sourceBuffer.vertex(matrix, new Vector3f(0,0,0)).color(0,255,0,255).normal(0, 1, 0);
+                sourceBuffer.vertex(matrix, source.getDirection().getUnitVector().mul(0.5f) ).color(0,255,0,255).normal(0, 1, 0);
             }
             
             matrices.push();
