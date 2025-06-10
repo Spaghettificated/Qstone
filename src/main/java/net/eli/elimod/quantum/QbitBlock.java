@@ -144,7 +144,7 @@ public abstract class QbitBlock extends BlockWithEntity {
 					world.updateListeners(pos, state, state, 0);
 					world.updateListeners(neighbourPos, neighbour, neighbour, 0);
 					if(neighbour.getBlock() instanceof QbitBlock neighbourBlock)
-					neighbourBlock.reciveQbit(neighbour, world, neighbourPos);
+						neighbourBlock.reciveQbit(neighbour, world, neighbourPos);
 					return success;
 			}
 		}

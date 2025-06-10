@@ -74,18 +74,5 @@ public class QbitWireBlock extends QbitSpreadBlock {
     }
 
 
-    @Override
-    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        super.scheduledTick(state, world, pos, random);
-        if( !passQbit(state, world, pos)){
-            world.scheduleBlockTick(pos, this, 2);
-        }
-    }
-
-    @Override
-    public void reciveQbit(BlockState state, World world, BlockPos pos) {
-        world.scheduleBlockTick(pos, this, 2);
-        super.reciveQbit(state, world, pos);
-    }
 
 }

@@ -8,11 +8,13 @@ import net.eli.elimod.utils.OptDirection;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.block.WireOrientation;
 
@@ -59,4 +61,17 @@ public abstract class QbitSpreadBlock extends QbitBlock{
 	}
     
     
+    @Override
+    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        super.scheduledTick(state, world, pos, random);
+        if( !passQbit(state, world, pos)){
+            world.scheduleBlockTick(pos, this, 2);
+        }
+    }
+
+    @Override
+    public void reciveQbit(BlockState state, World world, BlockPos pos) {
+        world.scheduleBlockTick(pos, this, 2);
+        super.reciveQbit(state, world, pos);
+    }
 }
