@@ -10,7 +10,9 @@ import net.eli.elimod.quantum.Gate;
 import net.eli.elimod.quantum.Qbit;
 import net.eli.elimod.quantum.QbitControlBlock;
 import net.eli.elimod.quantum.QbitGateBlock;
+import net.eli.elimod.quantum.QbitMeasurementBlock;
 import net.eli.elimod.quantum.QbitSourceBlock;
+import net.eli.elimod.quantum.QbitVoidBlock;
 import net.eli.elimod.quantum.QbitWireBlock;
 import net.eli.elimod.things.FragileBlock;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -73,7 +75,19 @@ public class ModBlocks {
 		AbstractBlock.Settings.create().nonOpaque(),
 		true
 	);
-	public static final Block[] QBIT_MAIN_BLOCKS = {QBIT_BLOCK, QBIT_WIRE, QBIT_CONTROL};
+	public static final Block QBIT_MEASUREMENT = registerBlock(
+		"qbit_measurement",
+		QbitMeasurementBlock::new,
+		AbstractBlock.Settings.create().nonOpaque(),
+		true
+	);
+	public static final Block QBIT_VOID = registerBlock(
+		"qbit_void",
+		QbitVoidBlock::new,
+		AbstractBlock.Settings.create().nonOpaque(),
+		true
+	);
+	public static final Block[] QBIT_MAIN_BLOCKS = {QBIT_BLOCK, QBIT_WIRE, QBIT_CONTROL, QBIT_VOID, QBIT_MEASUREMENT};
 	public static final Block[] QBIT_BLOCKS = Stream.concat(Arrays.stream(QBIT_MAIN_BLOCKS), Arrays.stream(QBIT_GATE_BLOCKS)).toArray(Block[]::new);
 
 
