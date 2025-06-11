@@ -144,7 +144,7 @@ public class Gate {
                 no_change_factors[i] = State.projection(Qbit.ZERO);
                 change_factors[i]    = State.projection(Qbit.ONE);
             }
-            else if(i==control_qbit){
+            else if(i==acting_qbit){
                 no_change_factors[i] = Gate.I;
                 change_factors[i]    = this;
             }
@@ -156,6 +156,7 @@ public class Gate {
         Gate no_change = Gate.tensor(no_change_factors);
         Gate change = Gate.tensor(change_factors);
         return no_change.add(change);
+        // return Gate.tensor(no);
     }
 
     public Gate mul(Complex scalar) { //gen

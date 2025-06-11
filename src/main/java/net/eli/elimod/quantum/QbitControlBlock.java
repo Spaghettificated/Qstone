@@ -125,4 +125,14 @@ public class QbitControlBlock extends QbitBlock {
         float diff = 3f/8f;
         return VoxelShapes.cuboid(0.5f - diff, 0.5f - diff, 0.5f - diff, 0.5f + diff, 0.5f + diff, 0.5f + diff);
     }
+
+    @Override
+    public void reciveQbit(BlockState state, World world, BlockPos pos) {
+        var gatePos = pos.offset(state.get(FACING));
+        var gateBlockState = world.getBlockState(gatePos);
+        if (gateBlockState.getBlock() instanceof QbitGateBlock gateBlock){
+            gateBlock.reciveQbit(gateBlockState, world, gatePos);
+        }
+        super.reciveQbit(state, world, pos);
+    }
 }

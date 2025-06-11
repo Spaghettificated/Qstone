@@ -134,25 +134,37 @@ public abstract class QbitBlock extends BlockWithEntity {
 			var neighbour = world.getBlockState(neighbourPos);
 			if (neighbour.get(SOURCE, OptDirection.NONE).getDirection().getOpposite() == targetDir.getDirection()
 				&& world.getBlockEntity(neighbourPos) instanceof QbitEntity neighbourEntity
-				&& world.getBlockEntity(pos) instanceof QbitEntity thisEntity) {
+				&& world.getBlockEntity(pos) instanceof QbitEntity thisEntity
+				&& thisEntity.isPresent()) {
 					boolean success;
+					if(world.getBlockEntity(pos) instanceof QbitEntity entity)
+						System.out.println("passing: " + entity.getState().get().toString() + " " + Integer.toString(entity.getQbitNumber()) + " | " + Integer.toString(entity.getQbit_pos()));
+
 					if (isTarget())
 						success = neighbourEntity.takeFrom(thisEntity, world);
 					else
 						success = neighbourEntity.clone(thisEntity);
-					world.updateNeighbor(neighbourPos, this, null);
-					world.updateListeners(pos, state, state, 0);
-					world.updateListeners(neighbourPos, neighbour, neighbour, 0);
-					if(neighbour.getBlock() instanceof QbitBlock neighbourBlock)
-						neighbourBlock.reciveQbit(neighbour, world, neighbourPos);
+					if (success){
+						world.updateNeighbor(neighbourPos, this, null);
+						world.updateListeners(pos, state, state, 0);
+						world.updateListeners(neighbourPos, neighbour, neighbour, 0);
+						if(neighbour.getBlock() instanceof QbitBlock neighbourBlock)
+							neighbourBlock.reciveQbit(neighbour, world, neighbourPos);
+	
+					}
+
 					return success;
 			}
 		}
 
+		
 		return false;
 	}
 	public void reciveQbit(BlockState state, World world, BlockPos pos) {
-		
+
+		if(world.getBlockEntity(pos) instanceof QbitEntity entity && entity.isPresent())
+			System.out.println("reciving: " + entity.getState().get().toString() + " " + Integer.toString(entity.getQbitNumber()) + " | " + Integer.toString(entity.getQbit_pos()));
+
 	}
 
 

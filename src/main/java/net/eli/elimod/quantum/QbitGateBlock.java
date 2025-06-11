@@ -138,36 +138,46 @@ public class QbitGateBlock extends QbitSpreadBlock {
     }
     @Override
     public void reciveQbit(BlockState state, World world, BlockPos pos) {
-        super.reciveQbit(state, world, pos);
         if (world.getBlockEntity(pos) instanceof QbitEntity entity) {
-            var sourceQbit = entity.getState().get();
-            // if( control.isPresent()){
-            if( state.get(IS_CONTROLLED, false)){
+            Gate actinGate = gate;
+            var hasControl = state.get(IS_CONTROLLED, false);
+            if (hasControl && world.getBlockEntity(pos.offset(state.get(CONTROL_DIRECTION))) instanceof QbitEntity controlEntity){ // jeśli ma bramkę kontrolną
+                if (entity.isPresent() && controlEntity.isPresent()){
+                    System.out.println("entangling: " + entity.getState().get().toString() + " " + Integer.toString(entity.getQbitNumber()) + " | " + Integer.toString(entity.getQbit_pos()));
+                    System.out.println("with:       " + entity.getState().get().toString() + " " + Integer.toString(entity.getQbitNumber()) + " | " + Integer.toString(entity.getQbit_pos()));
+                    entity.entangle(controlEntity);
+                    System.out.println("entangled state " + entity.getState().get().toString() + " on " + Integer.toString(entity.getQbitNumber()) + " qbits");
+                    System.out.println(Integer.toString(controlEntity.getQbit_pos()) + " | " + Integer.toString(entity.getQbit_pos()));
+                    actinGate = gate.controled(entity.getQbitNumber(), controlEntity.getQbit_pos(), entity.getQbit_pos());
+                    entity.actOnAll(actinGate, world);
+                    System.out.println("output state " + entity.getState().get().toString() + " on " + Integer.toString(entity.getQbitNumber()) + " qbits");
+                    System.out.println(entity.disentangle(world));
+                }
+            }
+            else if (entity.isPresent() && !hasControl){
+                entity.actOnAll(actinGate, world);
+            }
+        }
+        super.reciveQbit(state, world, pos);
+    }
+    @Override
+    public boolean passQbit(BlockState state, World world, BlockPos pos) {
+        if (world.getBlockEntity(pos) instanceof QbitEntity entity) {
+            var hasControl = state.get(IS_CONTROLLED, false);
+            if (hasControl){ // jeśli ma bramkę kontrolną
                 var controlPos = pos.offset(state.get(CONTROL_DIRECTION));
-                // var controlPos = control.get();
-                QbitEntity controlSource = sourceQbit(world.getBlockState(controlPos), world, controlPos).get();
-                var controlSourceQbit = controlSource.getState().get();
-
-                State entangled = State.tensor(sourceQbit, controlSourceQbit);
-                Gate controlled_gate = gate.controled_by1();
-                var disentangled = controlled_gate.actOn(entangled).decomposeState();
-                if(disentangled.isPresent()){
-                    setState(Optional.of(disentangled.get()[0]), state, world, pos, null);
-                    setState(Optional.of(disentangled.get()[1]), world.getBlockState(controlPos), world, controlPos, null);
+                if (world.getBlockEntity(controlPos) instanceof QbitEntity controlEntity) {
+                    if (entity.isPresent() && controlEntity.isPresent()
+                        && world.getBlockState(controlPos).getBlock() instanceof QbitBlock controlBlock ){
+                            controlBlock.passQbit(world.getBlockState(controlPos), world, controlPos);
+                            return super.passQbit(state, world, pos);
+                    }
                 }
-                else{
-                    return;
-                }
-
-                
-                // var controlSource = world.getBlockEntity(pos)
             }
-            else{
-                setState(Optional.of(gate.actOn(sourceQbit)), state, world, pos, null);
+            else if (entity.isPresent()){
+                return super.passQbit(state, world, pos);
             }
         }
-        else{
-            setState(Optional.empty(), state, world, pos, null);
-        }
+        return false;
     }
 }

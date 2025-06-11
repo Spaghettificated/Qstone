@@ -3,10 +3,13 @@ package net.eli.elimod.quantum;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import com.jcraft.jorbis.Block;
+
 import net.eli.elimod.utils.OptDirection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.block.pattern.BlockPattern;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
@@ -20,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 
 @Environment(EnvType.CLIENT)
 public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
@@ -78,6 +82,25 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
             var sourceBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
             sourceBuffer.vertex(matrix, new Vector3f(0,0,0)).color(0,255,0,255).normal(0, 1, 0);
             sourceBuffer.vertex(matrix, source.getDirection().getUnitVector().mul(0.5f) ).color(0,255,0,255).normal(0, 1, 0);
+        }
+        
+        
+        // if(entity.getState().isPresent())  System.out.println("rendering: " + entity.getState().get().toString() + " " + Integer.toString(entity.getQbitNumber()) + " | " + Integer.toString(entity.getQbit_pos()));
+        
+        // if(entity.getQbitNumber() > 1 && entity.getQbit_pos() == 0){
+        if(entity.getQbitNumber() > 1){
+            matrices.push();
+            var entanglineBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
+            for (var pos : entity.getEntangled().clone()) {
+                var thisPos = entity.getPos();
+                var v = new Vector3f(pos.getX() - thisPos.getX(), pos.getY() - thisPos.getY(), pos.getZ() - thisPos.getZ());
+                entanglineBuffer.vertex(matrix, v)
+                                        .color(255,0,255,255)
+                                        .normal(0, 1, 0);
+            }
+            int lala = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos());
+            MinecraftClient.getInstance().getItemRenderer().renderItem(markerItems[4], ItemDisplayContext.FIXED, lala, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
+            matrices.pop();
         }
 
         for (int i = 0 +j; i < blochVecs.length +j; i++) {

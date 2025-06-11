@@ -79,19 +79,19 @@ public class QbitSourceBlock extends QbitBlock {
 	protected void update(BlockState state, World world, BlockPos pos) {
 		boolean bl = world.isReceivingRedstonePower(pos);
 		boolean powered = state.get(POWERED);
-		System.out.println("source update");
+		// System.out.println("source update");
 		if (bl != powered) {
 			if (bl) {
-				System.out.println("sending qbit");
+				// System.out.println("sending qbit");
 				if (passQbit(state, world, pos)){
 					world.playSound((Entity)null, pos, SoundEvents.BLOCK_COPPER_BULB_TURN_ON , SoundCategory.BLOCKS);
-					System.out.println("qbit sent");
+					// System.out.println("qbit sent");
 				}
-				else System.out.println("qbit not sent");
+				// else System.out.println("qbit not sent");
 			}
 
 			world.setBlockState(pos, state.with(POWERED, bl), 3);
 		}
-		System.out.println("source update ended\n");
+		// System.out.println("source update ended\n");
     }
 }

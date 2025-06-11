@@ -130,6 +130,7 @@ public class State {
         return new State(vec);
     }
     public Optional<Qbit[]> decomposeState(){
+        System.out.println("decomposing: " + toString());
         if(vec.length == 0){
             Qbit[] out = {};
             return Optional.of(out);
@@ -140,6 +141,8 @@ public class State {
         }
         if(vec.length == 4){
             Qbit[] out = new Qbit[2];
+
+            System.out.println("check: " + vec[0].mul(vec[3]).toString() + " == " + vec[1].mul(vec[2]).toString() + "   " + ! vec[0].mul(vec[3])  .eq(   vec[1].mul(vec[2]) ));
             if(! vec[0].mul(vec[3])  .eq(   vec[1].mul(vec[2]) )){
                 return Optional.empty();
             }

@@ -20,6 +20,7 @@ import net.minecraft.world.block.WireOrientation;
 
 public abstract class QbitSpreadBlock extends QbitBlock{
 	public static final EnumProperty<Direction> FACING = Properties.FACING;
+    public static final int delay = 2;
 
     public QbitSpreadBlock(Settings settings) {
         super(settings);
@@ -66,13 +67,13 @@ public abstract class QbitSpreadBlock extends QbitBlock{
     protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         super.scheduledTick(state, world, pos, random);
         if( !passQbit(state, world, pos)){
-            world.scheduleBlockTick(pos, this, 2);
+            world.scheduleBlockTick(pos, this, delay);
         }
     }
 
     @Override
     public void reciveQbit(BlockState state, World world, BlockPos pos) {
-        world.scheduleBlockTick(pos, this, 2);
+        world.scheduleBlockTick(pos, this, delay);
         super.reciveQbit(state, world, pos);
     }
 }

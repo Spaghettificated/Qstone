@@ -2,6 +2,7 @@ package net.eli.elimod.quantum;
 
 import java.util.Arrays;
 
+
 public class Complex implements Cloneable{
     public double re;
     public double im;
@@ -35,7 +36,7 @@ public class Complex implements Cloneable{
 
     public boolean eq(Complex other) {
         // return (re==other.re) && (im == other.im);
-        return (re - other.re < 0.001) && (im - other.im < 0.01);
+        return (Math.abs(re - other.re) < 0.01) && (Math.abs(im - other.im) < 0.01);
     }
 
     public Complex neg() { return new Complex(-re, -im); }

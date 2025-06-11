@@ -14,6 +14,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
+import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -39,13 +40,14 @@ public class QbitEntity extends BlockEntity{
     public void setEntangled(BlockPos[] entangled) {  this.entangled = entangled; }
     public Optional<State> getState()                { return state; }
     public Vec3d[] getBlochVecs()                  { return blochVecs; }
-    public void setState(Qbit qbit)                 { this.state = Optional.of(qbit); this.updateBlochVecs(); }
+    public void setState(State qbit)                 { this.state = Optional.of(qbit); this.updateBlochVecs(); }
     public void clearState()                        { this.state = Optional.empty();  this.updateBlochVecs(); }
     public void setStateOption(Optional<State> qbit) { this.state = qbit;             this.updateBlochVecs(); }
     // public void set(QbitEntity other) {this.qbit = other.qbit; this.qbit_pos = other.qbit_pos;}
     
     public boolean isPresent() { return state.isPresent(); }
     public boolean isEmpty()   { return state.isEmpty(); }
+    public int getQbitNumber() { return entangled.length; }
 
     public void setQbit(Qbit qbit){
         state = Optional.of(qbit);
@@ -57,17 +59,17 @@ public class QbitEntity extends BlockEntity{
     }
 
     public boolean clone(QbitEntity other){
-        for (BlockPos pos : other.entangled) {
+        for (BlockPos pos : other.getEntangled()) {
             if (pos==getPos()) { return false; }
         }
-        qbit_pos = other.qbit_pos;
-        System.out.println(String.format("target qbits: %d, source qubits: %d", entangled.length, other.entangled.length));
-        entangled = other.entangled.clone();
-        System.out.println(String.format("target qbits: %d, source qubits: %d", entangled.length, other.entangled.length));
+        this.qbit_pos = other.qbit_pos;
+        // System.out.println(String.format("target qbits: %d, source qubits: %d", entangled.length, other.entangled.length));
+        this.entangled = other.getEntangled().clone();
+        // System.out.println(String.format("target qbits: %d, source qubits: %d", entangled.length, other.entangled.length));
         if (entangled.length > 0)
             { entangled[qbit_pos] = getPos(); }
-        state = other.getState();
-        blochVecs = other.getBlochVecs();
+        this.state = other.getState();
+        this.blochVecs = other.getBlochVecs();
         this.markDirty();
         return true;
     }
@@ -92,29 +94,65 @@ public class QbitEntity extends BlockEntity{
         return true;
     }
 
+    public void actOn(Gate gate, World world){
+        System.out.println("acting on " + state.get().toString() + " with\n" + gate.toString());
+        Gate[] gates = new Gate[getQbitNumber()]; 
+        Arrays.fill(gates, Gate.I);
+        gates[getQbit_pos()] = gate;
+        var actingGate = Gate.tensor(gates);
+
+        var result = actingGate.actOn(state.get());
+        for (var pos : getEntangled().clone()) {
+            if (world.getBlockEntity(pos) instanceof QbitEntity entity){
+                entity.setState(result);
+                entity.markDirty();
+            }
+        }
+    }
+
+    public void actOnAll(Gate gate, World world){
+        System.out.println("acting on " + state.get().toString() + " with\n" + gate.toString());
+
+        var result = gate.actOn(state.get());
+        for (var pos : getEntangled().clone()) {
+            if (world.getBlockEntity(pos) instanceof QbitEntity entity){
+                entity.setState(result);
+                entity.markDirty();
+            }
+        }
+    }
+
     public void updateBlochVecs(){
         // on second thought this probably shouldn't be calculated serverside
         // probably better is to have boolean "renderUpdatePending" here
         // and save bloch sphere state in renderer
 
-        int n_qbits = state.isPresent() ? 1 : 0;
+        int n_qbits = getQbitNumber();
         Vec3d[] out = new Vec3d[n_qbits];
         if(n_qbits == 1){
             out[0] = state.get().asQbit().get().blochVec();
+            blochVecs = out;
+        }
+        else{
+            blochVecs = new Vec3d[0];
         }
         // System.out.printf("%s %s %s %s\n", n_qbits, out.length, qbit, qbit.isPresent());
         // return out;
-        blochVecs = out;
     }
 
     public QbitEntity(BlockPos pos, BlockState state, Optional<State> initialQbit) {
         super(ModBlockEntities.QBIT_ENTITY, pos, state);
         this.state = initialQbit;
-        updateBlochVecs();
         // isVisible = true;
         qbit_pos = 0;
-        entangled = new BlockPos[1];
-        entangled[0] = pos;
+        if (initialQbit.isPresent()){
+            entangled = new BlockPos[1];
+            entangled[0] = pos;
+        }
+        else{
+            entangled = new BlockPos[0];
+        }
+        updateBlochVecs();
     }
     public QbitEntity(BlockPos pos, BlockState state, Qbit initialQbit) {
         this(pos, state, Optional.of(initialQbit));
@@ -132,9 +170,18 @@ public class QbitEntity extends BlockEntity{
         }
         nbt.put("state_coefficients", state_coefficients);
     }
-    
+    private void writeEntangledNBT(NbtCompound nbt) {
+        nbt.putInt("entangled_n", entangled.length);
+        NbtList components = new NbtList();
+        for (int i = 0; i < entangled.length; i++) {
+            components.add(3*i, NbtInt.of(entangled[i].getX()));
+            components.add(3*i+1, NbtInt.of(entangled[i].getY()));
+            components.add(3*i+2, NbtInt.of(entangled[i].getZ()));
+        //     // components.add( NbtInt.of(entangled[i/3].getComponentAlongAxis(Axis.values()[2-(i%3)])));
+        }
+        nbt.put("entangled_components", components);
+    }
     private void writeBlochNBT(NbtCompound nbt) {
-        
         nbt.putInt("bloch_n", blochVecs.length);
         NbtList blochComponents = new NbtList();
         for (int i = 0; i < blochVecs.length * 3; i++) {
@@ -150,6 +197,8 @@ public class QbitEntity extends BlockEntity{
             writeStateNBT(nbt, state.get(), "qbit0");
         }
         writeBlochNBT( nbt);
+        writeEntangledNBT( nbt);
+        nbt.putInt("qbit_pos", qbit_pos);
 
         // int[] blochComponents = new int[blochVecs.length * 3];
 		super.writeNbt(nbt, registryLookup);
@@ -172,15 +221,28 @@ public class QbitEntity extends BlockEntity{
             return Optional.empty();
         }
     }
+    private BlockPos[] readEntangledNBT(NbtCompound nbt) {
+        int bloch_n = nbt.getInt("entangled_n").get();
+        var blochComponents = nbt.getList("entangled_components").get();
+        BlockPos[] newBlochVecs = new BlockPos[bloch_n];
+        for (int i = 0; i < bloch_n; i++) {
+            newBlochVecs[i] = new BlockPos(
+                blochComponents.getInt(3*i).get(),
+                blochComponents.getInt(3*i+1).get(),
+                blochComponents.getInt(3*i+2).get()
+            );
+        }
+        return newBlochVecs;
+    }
     private Vec3d[] readBlochNBT(NbtCompound nbt) {
         int bloch_n = nbt.getInt("bloch_n").get();
         var blochComponents = nbt.getList("bloch_components").get();
         Vec3d[] newBlochVecs = new Vec3d[bloch_n];
         for (int i = 0; i < bloch_n; i++) {
             newBlochVecs[i] = new Vec3d(
-                blochComponents.getDouble(i).get(),
-                blochComponents.getDouble(i+1).get(),
-                blochComponents.getDouble(i+2).get()
+                blochComponents.getDouble(3*i).get(),
+                blochComponents.getDouble(3*i+1).get(),
+                blochComponents.getDouble(3*i+2).get()
             );
         }
         return newBlochVecs;
@@ -191,31 +253,47 @@ public class QbitEntity extends BlockEntity{
 		super.readNbt(nbt, registryLookup);
         state = readQbitNBT(nbt, "qbit0");
         blochVecs = readBlochNBT(nbt);
+        this.entangled = readEntangledNBT(nbt);
+        qbit_pos = nbt.getInt("qbit_pos", qbit_pos);
 	}
 
     public void entangle(QbitEntity other){
-        if(! Arrays.asList(entangled).contains(other.getPos()) ){
+        if(Arrays.asList(entangled).contains(other.getPos()) ){
             return;
         }
-        int n = state.get().numQbits();
-        entangled = ArrayUtils.addAll(entangled, other.getEntangled());
+        // int n = state.get().numQbits();
+        int n = getQbitNumber();
+        int other_n = other.getQbitNumber();
+        // entangled = ArrayUtils.addAll(entangled, other.getEntangled());
+        var new_entangled = new BlockPos[n + other_n];
+        for (int i = 0; i < n; i++) {
+                new_entangled[i] = entangled[i];
+        }
+        for (int i = 0; i < other_n; i++) {
+                new_entangled[n+i] = other.getEntangled()[i];
+        }
+        this.entangled = new_entangled;
         state = Optional.of(State.tensor(state.get(), other.state.get()));
-        other.get_entangled(n, state, entangled.clone());
+        other.get_entangled(n, state, new_entangled.clone());
+        this.markDirty();
     }
     public void get_entangled(int other_n, Optional<State> state, BlockPos[] ent){
-        qbit_pos = other_n + qbit_pos;
-        state = state;
-        entangled = ent;
+        this.qbit_pos = other_n + this.qbit_pos;
+        this.state = state;
+        this.entangled = ent;
+        this.markDirty();
     }
     public boolean disentangle(World world){
         if( state.get().numQbits() == 2 ){
             var bits = state.get().decomposeState();
-            if(!bits.isPresent()) { return false; }
-            for (var p : entangled) {
+            if(bits.isEmpty()) { return false; }
+            for (var p : getEntangled().clone()) {
                 if(world.getBlockEntity(p) instanceof QbitEntity qbitEntity){
                     qbitEntity.getDisentangled(bits.get());
                 }
             }
+            this.updateBlochVecs();
+            this.markDirty();
             return true;
         }
         return false;
@@ -225,6 +303,8 @@ public class QbitEntity extends BlockEntity{
         qbit_pos = 0;
         entangled = new BlockPos[1];
         entangled[0] = getPos();
+        this.updateBlochVecs();
+        this.markDirty();
     }
 
 
