@@ -113,6 +113,7 @@ public class State {
         return this;
     }
 
+
     public static State productState(Qbit... qbits){
         int n = qbits.length;
         Complex[] vec = new Complex[Utils.powi(2, n)];

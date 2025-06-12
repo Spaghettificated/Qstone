@@ -1,10 +1,6 @@
 package net.eli.elimod;
 
-import net.eli.elimod.quantum.Complex;
 import net.eli.elimod.quantum.Gate;
-import net.eli.elimod.quantum.MultiQbit;
-import net.eli.elimod.quantum.Qbit;
-import net.eli.elimod.quantum.State;
 
 public class Main {
     public static void main(String[] args) {
@@ -50,5 +46,6 @@ public class Main {
         System.err.println(Gate.X.controled_by0());
 
         System.err.println(Gate.X.controled(2, 0, 1));
+        System.out.println(1 << 2 );
     }
   }

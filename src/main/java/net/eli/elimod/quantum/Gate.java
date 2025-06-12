@@ -1,5 +1,7 @@
 package net.eli.elimod.quantum;
 
+import java.util.Arrays;
+
 import net.eli.elimod.utils.Utils;
 
 public class Gate {
@@ -98,6 +100,13 @@ public class Gate {
                 out[i] = out[i].add(Complex.mul(mat[i][j], v[j]));
         }}
         return new State(out);
+    }
+
+    public Gate extended(int n_qbits, int qbit_pos){
+        Gate[] gates = new Gate[n_qbits]; 
+        Arrays.fill(gates, Gate.I);
+        gates[qbit_pos] = this;
+        return Gate.tensor(gates);
     }
 
 

@@ -22,6 +22,9 @@ public class QbitVoidBlock extends QbitSpreadBlock{
 
     @Override
     public void reciveQbit(BlockState state, World world, BlockPos pos) {
+      if(world.getBlockEntity(pos) instanceof QbitEntity entity){
+        entity.clear();
+      }
     }
 
 }

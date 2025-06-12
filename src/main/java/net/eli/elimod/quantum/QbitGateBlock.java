@@ -155,7 +155,7 @@ public class QbitGateBlock extends QbitSpreadBlock {
                 }
             }
             else if (entity.isPresent() && !hasControl){
-                entity.actOnAll(actinGate, world);
+                entity.actOn(actinGate, world);
             }
         }
         super.reciveQbit(state, world, pos);

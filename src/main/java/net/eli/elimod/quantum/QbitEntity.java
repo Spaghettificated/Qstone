@@ -9,6 +9,7 @@ import com.google.common.collect.Streams;
 import com.llamalad7.mixinextras.lib.apache.commons.ArrayUtils;
 
 import net.eli.elimod.setup.ModBlockEntities;
+import net.eli.elimod.utils.Utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,6 +22,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -31,11 +33,13 @@ public class QbitEntity extends BlockEntity{
     public boolean updated = false;
     private Optional<State> state;
     private int qbit_pos;
+
     private BlockPos[] entangled;
 
     private Vec3d[] blochVecs = new Vec3d[0];
 
     public int getQbit_pos() { return qbit_pos; }
+    public void setQbit_pos(int qbit_pos) { this.qbit_pos = qbit_pos; }
     public BlockPos[] getEntangled() { return entangled; }
     public void setEntangled(BlockPos[] entangled) {  this.entangled = entangled; }
     public Optional<State> getState()                { return state; }
@@ -96,10 +100,7 @@ public class QbitEntity extends BlockEntity{
 
     public void actOn(Gate gate, World world){
         System.out.println("acting on " + state.get().toString() + " with\n" + gate.toString());
-        Gate[] gates = new Gate[getQbitNumber()]; 
-        Arrays.fill(gates, Gate.I);
-        gates[getQbit_pos()] = gate;
-        var actingGate = Gate.tensor(gates);
+        var actingGate = gate.extended(getQbitNumber(), getQbit_pos());
 
         var result = actingGate.actOn(state.get());
         for (var pos : getEntangled().clone()) {
@@ -108,6 +109,54 @@ public class QbitEntity extends BlockEntity{
                 entity.markDirty();
             }
         }
+    }
+
+    public void collapse(Qbit into){
+        int n = getQbitNumber() - 1;
+        int j = getQbit_pos();
+        int p = Utils.powi(2, n);
+        Complex[] stateArr = new Complex[p];
+        // for (int i = 0; i < stateArr.length; i++)   { stateArr[i] = Complex.ZERO; }
+
+        BlockPos[] restEntangled = new BlockPos[n];
+
+        for (int i = 0; i < j; i++) {
+            restEntangled[i] = entangled[i];
+        }
+        for (int i = j+1; i < n+1; i++) {
+            restEntangled[i-1] = entangled[i];
+        }
+
+        var oldVec = getState().get().vec;
+        for (int i = 0; i < p; i++) {
+            int x = Utils.powi(2, j);
+            var y = p/x;
+            var a = oldVec[x*i].mul(into.get(0));
+            var b = oldVec[x*i + y].mul(into.get(1));
+            stateArr[i] = a.add(b);
+        }
+        State restState = new State(stateArr);
+
+        for (int i = 0; i < j; i++) {
+            if (world.getBlockEntity(entangled[i]) instanceof QbitEntity ent){
+                ent.setState(restState);
+                ent.setEntangled(restEntangled);
+                ent.updateBlochVecs();
+                ent.markDirty();
+            }
+        }
+        for (int i = j+1; i < n+1; i++) {
+            if (world.getBlockEntity(entangled[i]) instanceof QbitEntity ent){
+                ent.setState(restState);
+                ent.setEntangled(restEntangled);
+                ent.setQbit_pos(ent.getQbit_pos() - 1);
+                ent.updateBlochVecs();
+                ent.markDirty();
+            }
+        }
+
+        setQbit(into);
+        markDirty();
     }
 
     public void actOnAll(Gate gate, World world){
@@ -174,7 +223,7 @@ public class QbitEntity extends BlockEntity{
         nbt.putInt("entangled_n", entangled.length);
         NbtList components = new NbtList();
         for (int i = 0; i < entangled.length; i++) {
-            components.add(3*i, NbtInt.of(entangled[i].getX()));
+            components.add(3*i,   NbtInt.of(entangled[i].getX()));
             components.add(3*i+1, NbtInt.of(entangled[i].getY()));
             components.add(3*i+2, NbtInt.of(entangled[i].getZ()));
         //     // components.add( NbtInt.of(entangled[i/3].getComponentAlongAxis(Axis.values()[2-(i%3)])));
