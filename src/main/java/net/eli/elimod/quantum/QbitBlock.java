@@ -148,6 +148,7 @@ public abstract class QbitBlock extends BlockWithEntity {
 						world.updateNeighbor(neighbourPos, this, null);
 						world.updateListeners(pos, state, state, 0);
 						world.updateListeners(neighbourPos, neighbour, neighbour, 0);
+
 						if(neighbour.getBlock() instanceof QbitBlock neighbourBlock)
 							neighbourBlock.reciveQbit(neighbour, world, neighbourPos);
 	
@@ -162,9 +163,22 @@ public abstract class QbitBlock extends BlockWithEntity {
 	}
 	public void reciveQbit(BlockState state, World world, BlockPos pos) {
 
-		if(world.getBlockEntity(pos) instanceof QbitEntity entity && entity.isPresent())
+		if(world.getBlockEntity(pos) instanceof QbitEntity entity && entity.isPresent()){
 			System.out.println("reciving: " + entity.getState().get().toString() + " " + Integer.toString(entity.getQbitNumber()) + " | " + Integer.toString(entity.getQbit_pos()));
 
+			for (BlockPos epos : entity.getEntangled()){
+				// world.updateListeners(pos, state, state, 0);
+
+				if(world.getBlockEntity(epos) instanceof QbitEntity otherEntity && entity.isPresent()){
+					otherEntity.markDirty();
+				}
+
+				if (epos != pos){
+					world.updateNeighbor(epos, null, null);
+					world.updateListeners(epos, world.getBlockState(epos), world.getBlockState(epos), 0);
+				}
+			}
+		}
 	}
 
 

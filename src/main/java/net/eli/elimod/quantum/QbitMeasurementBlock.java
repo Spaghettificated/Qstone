@@ -56,6 +56,7 @@ public class QbitMeasurementBlock extends QbitSpreadBlock {
             System.out.println("Randomize: 0:" + Double.toString(prob0) + ", 1:" + Double.toString(prob1));
             System.out.println("Randomized: " + Double.toString(r));
             boolean out;
+            var toUpdate = entity.getEntangled();
             if (r < (prob0 / (prob0+prob1))) {
                 entity.collapse(Qbit.ZERO);
                 out =  false;
@@ -64,11 +65,10 @@ public class QbitMeasurementBlock extends QbitSpreadBlock {
                 entity.collapse(Qbit.ONE);
                 out =  true;
             }
-            for (BlockPos epos : entity.getEntangled()){
+            for (BlockPos epos : toUpdate){
               if (epos != pos){
-                // var estate = world.getBlockState(epos);
-                // world.updateListeners(epos, estate, estate, FORCE_STATE);
                 world.updateNeighbor(epos, null, null);
+                world.updateListeners(epos, world.getBlockState(epos), world.getBlockState(epos), 0);
               }
             }
             return out;
@@ -77,13 +77,8 @@ public class QbitMeasurementBlock extends QbitSpreadBlock {
     }
 
     @Override
-    public void reciveQbit(BlockState state, World world, BlockPos pos) {
-        super.reciveQbit(state, world, pos);
-    }
-    @Override
     protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock,
             WireOrientation wireOrientation, boolean notify) {
-        super.neighborUpdate(state, world, pos, sourceBlock, wireOrientation, notify);
         boolean bl = world.isReceivingRedstonePower(pos);
         boolean powered = state.get(POWERED);
         boolean emits = state.get(EMITS);
@@ -93,13 +88,15 @@ public class QbitMeasurementBlock extends QbitSpreadBlock {
             var meassured = meassure(newState, world, pos);
             if (meassured!=null){
               newState = newState.with(EMITS, meassured);
-              passQbit(newState, world, pos);
+              world.scheduleBlockTick(pos, this, 2);
+            //   passQbit(newState, world, pos);
               world.playSound((Entity)null, pos, SoundEvents.BLOCK_COPPER_BULB_TURN_ON , SoundCategory.BLOCKS);
             }
         }
         if(!bl && emits){
             newState = newState.with(EMITS, false);
         }
+        super.neighborUpdate(state, world, pos, sourceBlock, wireOrientation, notify);
         world.setBlockState(pos, newState.with(POWERED, bl), 3);
     } 
     @Override
@@ -120,6 +117,26 @@ public class QbitMeasurementBlock extends QbitSpreadBlock {
     
     @Override
     protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        passQbit(state, world, pos);
+    }
+    @Override
+    public void reciveQbit(BlockState state, World world, BlockPos pos) {
+		if(world.getBlockEntity(pos) instanceof QbitEntity entity && entity.isPresent()){
+			System.out.println("reciving: " + entity.getState().get().toString() + " " + Integer.toString(entity.getQbitNumber()) + " | " + Integer.toString(entity.getQbit_pos()));
+
+			for (BlockPos epos : entity.getEntangled()){
+				// world.updateListeners(pos, state, state, 0);
+
+				if(world.getBlockEntity(epos) instanceof QbitEntity otherEntity && entity.isPresent()){
+					otherEntity.markDirty();
+				}
+
+				if (epos != pos){
+					world.updateNeighbor(epos, null, null);
+					world.updateListeners(epos, world.getBlockState(epos), world.getBlockState(epos), 0);
+				}
+			}
+		}
     }
 
 }

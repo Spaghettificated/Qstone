@@ -101,41 +101,6 @@ public class QbitGateBlock extends QbitSpreadBlock {
 		return super.getStateForNeighborUpdate(new_state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
-    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
-        
-        
-        // Optional<QbitEntity> source = sourceQbit(state, world, pos);
-        // if (source.isPresent()) {
-        //     var sourceQbit = source.get().getState().get();
-        //     // if( control.isPresent()){
-        //     if( state.get(IS_CONTROLLED, false)){
-        //         var controlPos = pos.offset(state.get(CONTROL_DIRECTION));
-        //         // var controlPos = control.get();
-        //         QbitEntity controlSource = sourceQbit(world.getBlockState(controlPos), world, controlPos).get();
-        //         var controlSourceQbit = controlSource.getState().get();
-
-        //         State entangled = State.tensor(sourceQbit, controlSourceQbit);
-        //         Gate controlled_gate = gate.controled_by1();
-        //         var disentangled = controlled_gate.actOn(entangled).decomposeState();
-        //         if(disentangled.isPresent()){
-        //             setState(Optional.of(disentangled.get()[0]), state, world, pos, sourceBlock);
-        //             setState(Optional.of(disentangled.get()[1]), world.getBlockState(controlPos), world, controlPos, sourceBlock);
-        //         }
-        //         else{
-        //             return;
-        //         }
-
-                
-        //         // var controlSource = world.getBlockEntity(pos)
-        //     }
-        //     else{
-        //         setState(Optional.of(gate.actOn(sourceQbit)), state, world, pos, sourceBlock);
-        //     }
-        // }
-        // else{
-        //     setState(Optional.empty(), state, world, pos, sourceBlock);
-        // }
-    }
     @Override
     public void reciveQbit(BlockState state, World world, BlockPos pos) {
         if (world.getBlockEntity(pos) instanceof QbitEntity entity) {
@@ -156,6 +121,11 @@ public class QbitGateBlock extends QbitSpreadBlock {
             }
             else if (entity.isPresent() && !hasControl){
                 entity.actOn(actinGate, world);
+            }
+            for (BlockPos epos : entity.getEntangled()){
+              if (epos != pos){
+                world.updateNeighbor(epos, null, null);
+              }
             }
         }
         super.reciveQbit(state, world, pos);

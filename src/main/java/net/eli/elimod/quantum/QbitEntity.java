@@ -136,6 +136,7 @@ public class QbitEntity extends BlockEntity{
             stateArr[i] = a.add(b);
         }
         State restState = new State(stateArr);
+        restState = restState.normalize();
 
         for (int i = 0; i < j; i++) {
             if (world.getBlockEntity(entangled[i]) instanceof QbitEntity ent){
