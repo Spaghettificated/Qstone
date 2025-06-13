@@ -1,6 +1,6 @@
 {
     "model": {
         "type" : "minecraft:model",
-        "model": "elimod:block//qbit_void"
+        "model": "elimod:block/qbit_void"
       }
 }
