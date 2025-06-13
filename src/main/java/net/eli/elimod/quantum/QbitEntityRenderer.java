@@ -44,6 +44,7 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
         new ItemStack(Items.YELLOW_CONCRETE),
         new ItemStack(Items.BLACK_CONCRETE),
     };
+    private static final ItemStack entangleMarker = new ItemStack(Items.MAGENTA_STAINED_GLASS);
     public static final double marker_size = 0.4;
     public static final double marigin_size = 0.03;
     public int marker_id =0;
@@ -99,7 +100,7 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
                                         .normal(0, 1, 0);
             }
             int lala = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos());
-            MinecraftClient.getInstance().getItemRenderer().renderItem(markerItems[4], ItemDisplayContext.FIXED, lala, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
+            MinecraftClient.getInstance().getItemRenderer().renderItem(entangleMarker, ItemDisplayContext.FIXED, lala, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
             matrices.pop();
         }
 

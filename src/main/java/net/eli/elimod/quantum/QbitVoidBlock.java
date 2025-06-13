@@ -5,7 +5,11 @@ import com.mojang.serialization.MapCodec;
 import net.eli.elimod.utils.OptDirection;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
 public class QbitVoidBlock extends QbitSpreadBlock{
@@ -27,4 +31,11 @@ public class QbitVoidBlock extends QbitSpreadBlock{
       }
     }
 
+
+    @Override
+    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
+        // float diff = 1f/8f;
+        float diff = 3f/8f;
+        return VoxelShapes.cuboid(0.5f - diff, 0.5f - diff, 0.5f - diff, 0.5f + diff, 0.5f + diff, 0.5f + diff);
+    }
 }
