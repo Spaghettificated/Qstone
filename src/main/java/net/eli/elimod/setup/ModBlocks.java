@@ -18,6 +18,7 @@ import net.eli.elimod.things.FragileBlock;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.AbstractBlock.ContextPredicate;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
@@ -32,19 +33,19 @@ public class ModBlocks {
     public static final Block FRAGILE_BLOCK = registerBlock(
 		"fragile_block",
 		FragileBlock::new,
-		AbstractBlock.Settings.create().sounds(BlockSoundGroup.GRASS),
+		AbstractBlock.Settings.create().sounds(BlockSoundGroup.GRASS).solidBlock((state, world, pos) -> { return false;}),
 		true
     );
 	public static final Block QBIT_BLOCK = registerBlock(
 		"qbit_block",
 		QbitSourceBlock::new,
-		AbstractBlock.Settings.create().nonOpaque(),
+		AbstractBlock.Settings.create().nonOpaque().solidBlock((state, world, pos) -> { return false;}),
 		true
 	);
 	public static final Block QBIT_WIRE = registerBlock(
 		"qbit_wire",
 		QbitWireBlock::new,
-		AbstractBlock.Settings.create().nonOpaque(),
+		AbstractBlock.Settings.create().nonOpaque().solidBlock((state, world, pos) -> { return false;}),
 		true
 	);
 	// public static final Block QBIT_GATE = registerBlock(
@@ -63,7 +64,7 @@ public class ModBlocks {
 			QBIT_GATE_BLOCKS[i] = registerBlock(
 				"qbit_gate_" + gatename,
 				settings ->  new QbitGateBlock(settings, gate),
-				AbstractBlock.Settings.create().nonOpaque(),
+				AbstractBlock.Settings.create().nonOpaque().solidBlock((state, world, pos) -> { return false;}),
 				true
 			);
 			i++;
@@ -78,13 +79,13 @@ public class ModBlocks {
 	public static final Block QBIT_MEASUREMENT = registerBlock(
 		"qbit_measurement",
 		QbitMeasurementBlock::new,
-		AbstractBlock.Settings.create().nonOpaque(),
+		AbstractBlock.Settings.create().nonOpaque().solidBlock((state, world, pos) -> { return false;}),
 		true
 	);
 	public static final Block QBIT_VOID = registerBlock(
 		"qbit_void",
 		QbitVoidBlock::new,
-		AbstractBlock.Settings.create().nonOpaque(),
+		AbstractBlock.Settings.create().nonOpaque().solidBlock((state, world, pos) -> { return false;}),
 		true
 	);
 	public static final Block[] QBIT_MAIN_BLOCKS = {QBIT_BLOCK, QBIT_WIRE, QBIT_CONTROL, QBIT_VOID, QBIT_MEASUREMENT};
