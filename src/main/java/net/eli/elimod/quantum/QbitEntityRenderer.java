@@ -22,6 +22,7 @@ import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
@@ -90,7 +91,6 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
         
         // if(entity.getQbitNumber() > 1 && entity.getQbit_pos() == 0){
         if(entity.getQbitNumber() > 1){
-            matrices.push();
             var entanglineBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
             for (var pos : entity.getEntangled().clone()) {
                 var thisPos = entity.getPos();
@@ -99,6 +99,10 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
                                         .color(255,0,255,255)
                                         .normal(0, 1, 0);
             }
+
+            matrices.push();
+            var s = 0.55f;
+            matrices.scale(s,s,s);
             int lala = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos());
             MinecraftClient.getInstance().getItemRenderer().renderItem(entangleMarker, ItemDisplayContext.FIXED, lala, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
             matrices.pop();
@@ -106,6 +110,9 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
 
         for (int i = 0 +j; i < blochVecs.length +j; i++) {
             Vec3d bloch = blochVecs[i -j];
+            // bloch = bloch.normalize().multiply( Math.sqrt(bloch.length()));
+            // bloch = bloch.multiply(10);
+            // bloch = bloch.normalize();
             ItemStack markerItem = markerItems[i % markerItems.length];
 
             // var lineBuffer = vertexConsumers.getBuffer(RenderLayer.getLines());
@@ -119,6 +126,8 @@ public class QbitEntityRenderer implements BlockEntityRenderer<QbitEntity> {
             // Move the item
             matrices.translate(bloch.multiply(0.5 - marker_size/4. - marigin_size));
             matrices.scale((float)marker_size, (float)marker_size, (float)marker_size);
+            // matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(30*i));
+            // matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(20*i));
      
             // Rotate the item
             // matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((entity.getWorld().getTime() + tickDelta) * 4));

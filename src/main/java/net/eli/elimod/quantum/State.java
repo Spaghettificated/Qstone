@@ -165,14 +165,17 @@ public class State {
 
     public State[] schmidtDecomposition(){ // elements-of-quantum-computation-and-quantum-communication [Anirban Aathak] page 96 
         if(size()==2){
-            State[] out = {this};
+            Qbit[] out = {this.asQbit().get()};
             return out;
         }
         if(size() == 4){
+            System.out.println("Shmidt desomposition of " + toString());
             var out = new State[2];
             Complex a = vec[0].powi(2).add(vec[1].powi(2));
             Complex b = vec[0].con().mul(vec[2]). add( vec[1].con().mul(vec[3]));
-            Complex delta = Complex.sum(Complex.ONE, Complex.fromRe(4 * b.mag()), a.powi(2).mul(4), a.mul(-4)).sqrt();
+            // Complex b = vec[0].mul(vec[2].con()). add( vec[1].mul(vec[3].con()));
+            System.out.println(String.format("a = %s   b = %s", a.toString(), b.toString()));
+            Complex delta = Complex.sum(Complex.ONE, Complex.fromRe(4 * b.magSqr()), a.powi(2).mul(4), a.mul(-4)).sqrt();
             // Complex coeff0 = a.sqrt();
             // Complex coeff1 = Complex.ONE.sub(a).sqrt();
             Complex eigv0, eigv1;
@@ -186,11 +189,14 @@ public class State {
             else{
                 eigv0 = Complex.ONE.add(delta).div(2);
                 eigv1 = Complex.ONE.sub(delta).div(2);
-                v0 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta      ).div( b.con().mul(2) ), Complex.ONE);
-                v1 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta.neg()).div( b.con().mul(2) ), Complex.ONE);
+                // v0 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta      ).div( b.con().mul(2) ), Complex.ONE);
+                // v1 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta.neg()).div( b.con().mul(2) ), Complex.ONE);
+                v1 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta      ).div( b.con().mul(2) ).neg(), Complex.ONE);
+                v0 = new Qbit(Complex.sum(Complex.ONE, a.mul(-2), delta.neg()).div( b.con().mul(2) ).neg(), Complex.ONE);
             }
             v0.normalize();
             v1.normalize();
+            System.out.println(String.format("eigens: %s * %s  |  %s * %s", eigv0.toString(), v0.toString(), eigv1.toString(), v1.toString() ));
             var coeff0 = eigv0.sqrt();
             var coeff1 = eigv1.sqrt();
             // matrix for eqation M*(x0 x1) = (S0 S2) and M*(y0 y1) = (S1 S3) where S is initial 4-state and x,y form second qbit base
@@ -198,6 +204,7 @@ public class State {
             var mb = coeff1.mul(v1.get(0));
             var mc = coeff0.mul(v0.get(1));
             var md = coeff1.mul(v1.get(1));
+            System.out.println(String.format("equation matrix: [%s %s %s %s]", ma, mb, mc, md));
             var amp = Complex.ONE.div( Complex.sub( ma.mul(md), mb.mul(mc)) );
             Complex[][] inverse = {{md.div(amp),       mb.neg().div(amp)},
                                    {mc.neg().div(amp), ma.div(amp)      }};
@@ -206,9 +213,21 @@ public class State {
             var yvec = solveGate.actOn(new Qbit(vec[1], vec[3]));
             var u0 = new Qbit(xvec.get(0), yvec.get(0));
             var u1 = new Qbit(xvec.get(1), yvec.get(1));
+            u0 = u0.normalize().asQbit().get();
+            u1 = u1.normalize().asQbit().get();
+            // out[0] = u0;
+            // out[1] = u1;
+            out[0] = productState(v0,u0);
+            out[0].mulmut(coeff0);
+            out[1] = productState(v1,u1);
+            out[1].mulmut(coeff1);
+            System.out.println("result:");
+            System.out.println(String.format("%s * %s %s", coeff0.toString(), v0.toString(), u0.toString()));
+            System.out.println(String.format("%s * %s %s", coeff1.toString(), v1.toString(), u1.toString()));
+
             return out;
         }
-        return new State[0];
+        return new Qbit[0];
     }
     
     public Optional<Qbit> asQbit(){ 

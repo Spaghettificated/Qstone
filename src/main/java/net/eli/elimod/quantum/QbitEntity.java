@@ -183,6 +183,25 @@ public class QbitEntity extends BlockEntity{
             out[0] = state.get().asQbit().get().blochVec();
             blochVecs = out;
         }
+        else if(n_qbits==2){
+            var i = getQbit_pos();
+            var decomposed = state.get().decomposeState();
+            blochVecs = new Vec3d[2];
+            if(decomposed.isPresent()){
+                blochVecs[0] = decomposed.get()[0].blochVec();
+                blochVecs[1] = decomposed.get()[1].blochVec();
+            }
+            else {
+                var qbits = state.get().schmidtDecomposition();
+                var v0 = qbits[0].norm();
+                var v1 = qbits[1].norm();
+                var s0 = qbits[0].normalize().decomposeState().get();
+                var s1 = qbits[1].normalize().decomposeState().get();
+                blochVecs[0] = s0[i].mulmut(v0).blochVec();
+                blochVecs[1] = s1[i].mulmut(v1).blochVec();
+            }
+
+        }
         else{
             blochVecs = new Vec3d[0];
         }

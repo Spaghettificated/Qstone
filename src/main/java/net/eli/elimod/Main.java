@@ -1,6 +1,9 @@
 package net.eli.elimod;
 
+import net.eli.elimod.quantum.Complex;
 import net.eli.elimod.quantum.Gate;
+import net.eli.elimod.quantum.Qbit;
+import net.eli.elimod.quantum.State;
 
 public class Main {
     public static void main(String[] args) {
@@ -43,9 +46,24 @@ public class Main {
         // m.increment();
         // System.err.println(m.getI());
 
-        System.err.println(Gate.X.controled_by0());
+        // System.err.println(Gate.X.controled_by0());
 
-        System.err.println(Gate.X.controled(2, 0, 1));
-        System.out.println(1 << 2 );
+        // System.err.println(Gate.X.controled(2, 0, 1));
+        // System.out.println(1 << 2 );
+
+
+        System.err.println(Qbit.productState(Qbit.ZERO, Qbit.PLUS).schmidtDecomposition().toString());
+        // Complex[] s = {Complex.fromRe(1./2.), Complex.ZERO, Complex.ZERO, Complex.fromRe(Math.sqrt(3)/2.)};
+        // Complex[] s = {Complex.fromRe(1/Math.sqrt(2)), Complex.ZERO, Complex.ZERO, Complex.fromRe(1/Math.sqrt(2))};
+        // Complex[] s = {Complex.fromRe(1./Math.sqrt(2.)), Complex.fromRe(1./Math.sqrt(2.)), Complex.ZERO, Complex.ZERO};
+        Complex[] s = {Complex.fromRe(1/Math.sqrt(3)), Complex.fromRe(1/Math.sqrt(3)), Complex.fromRe(1/Math.sqrt(3)), Complex.ZERO};
+        // System.err.println(st.toString());
+        var st = new State(s);
+        System.err.println("");
+        var t = st.schmidtDecomposition();
+        for (State x : t) {
+            System.err.println(x.toString());
+        }  
+
     }
   }
