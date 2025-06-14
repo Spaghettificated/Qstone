@@ -20,7 +20,7 @@ import net.minecraft.world.block.WireOrientation;
 
 public abstract class QbitSpreadBlock extends QbitBlock{
 	public static final EnumProperty<Direction> FACING = Properties.FACING;
-    public static final int delay = 2;
+    public static final int delay = 6;
 
     public QbitSpreadBlock(Settings settings) {
         super(settings);
